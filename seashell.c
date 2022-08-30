@@ -77,6 +77,7 @@ void removeUnnecessarySpaces(char *str) {
     [2] Trims spaces from the last character onwards
     [3] Trims extra spaces in between words/arguments
     [4] If double quotes are used, it doesn't trim the spaces in between
+    [5] Also removes the newline char at the end (if present)
 
     E.g.
     ` hello  world   `    -> `hello world`
@@ -97,7 +98,7 @@ void removeUnnecessarySpaces(char *str) {
 
     // [2]
     for(int k = strlen(str) - 1; k >= 0; k--) {
-        if(str[k] != ' ') {
+        if(str[k] != ' ' && str[k] != '\n') {
             last_char = k;
             break;
         }
@@ -139,50 +140,64 @@ void run_exit() {
     }
 }
 
-void processStatement(char *statement) {
+void run_echo() {
+    char *arg = strtok(NULL, "");
+
+    // handling double quotes in echo
+    if(arg[0] == '"' && arg[strlen(arg)-1] == '"') {
+        for(int i = 1; i < strlen(arg)-1; i++) {
+            printf("%c", arg[i]);
+        }
+    } else {
+        arg = strtok(arg, " ");
+        while(arg != NULL) {
+            printf("%s", arg);
+            arg = strtok(NULL, " ");
+            if(arg != NULL) {
+                printf(" ");
+            }
+        }
+    }
+    
+    printf("\n");
+}
+
+void processStatement(struct ShellVariables *sv, char *statement) {
+    removeUnnecessarySpaces(statement);
+
     char *command = strtok(statement, " ");
 
     if(strcmp(command, "exit") == 0) {
         run_exit();
+    } else if(strcmp(command, "echo") == 0) {
+        run_echo();
     }
-
-    
 }
 
-void processInput(char *input_string) {
+void processInput(struct ShellVariables *sv, char *input_string) {
     // first tokenize with respect to ; with strtok
     // then process the commands individually
-    processStatement(input_string);
+    processStatement(sv, input_string);
 }
 
-
-
-
 int main() {
+
     printf("\n\033[31m---\033[m \033[34mWelcome to the SeaShell!\033[m \033[31m---\033[m\n\n");
 
     struct ShellVariables *sv = malloc(sizeof(struct ShellVariables));
-
     init_shell_variables(sv);
 
     while(sv->loop_control) {
         printShellPrompt(sv);
 
         char *input_string = malloc(MAX_COMMAND_LEN * sizeof(char));
-
         scanf("%[^\n]%*c", input_string); 
-        
-        
-        processInput(input_string);
 
-        
+        processInput(sv, input_string);
 
     }
     
-
     free(sv);
-
-
     printf("\n");
     return 0;
 }

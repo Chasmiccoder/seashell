@@ -19,7 +19,7 @@ cwd_path       - current working directory path
 Library Usage
 stdio.h   - printf(), scanf(), perror()
 stdlib.h  - malloc()
-unistd.h  - getlogin(), gethostname()
+unistd.h  - getlogin(), gethostname(), chdir(), getcwd()
 string.h  - strcpy(), strtok(), strcmp()
 errno.h   - errno
 
@@ -35,14 +35,33 @@ errno.h   - errno
 struct ShellVariables {
     char *username;
     char *hostname;
-    char *cwd_path;
+    char *cwd_path;      // current working directory path
+    char *prev_wd_path;  // previous working directory path
+    char *home_path;     // absolute path to the home directory (where this shell is stored)
 
     int loop_control;
 };
 
+void clear_string(char *str) {
+    memset(str, '\0', strlen(str) * sizeof(char));
+}
+
+int is_substring(char *substring, char *string) {
+    if(strlen(substring) > strlen(string)) {
+        return 0;
+    }
+
+    for(int i = 0; i < strlen(substring); i++) {
+        if(string[i] != substring[i]) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 
 void init_shell_variables(struct ShellVariables *sv) {
-    
     /* --- Fetch the username and the hostname --- */
     sv->username = malloc(MAX_USERNAME_LEN * sizeof(char));
     sv->username = getlogin();
@@ -52,25 +71,50 @@ void init_shell_variables(struct ShellVariables *sv) {
 
     // start at the root directory by default (where the shell is stored)
     sv->cwd_path = malloc(MAX_PATH_LEN * sizeof(char));
-    strcpy(sv->cwd_path, "~");
-    
+    getcwd(sv->cwd_path, MAX_PATH_LEN);
+
+    sv->prev_wd_path = malloc(MAX_PATH_LEN * sizeof(int));
+    strcpy(sv->prev_wd_path, sv->cwd_path);
+
+    sv->home_path = malloc(MAX_PATH_LEN * sizeof(int));
+    strcpy(sv->home_path, sv->cwd_path);
+
     sv->loop_control = 1;
 }
 
 
-void printShellPrompt(const struct ShellVariables *sv) {
+void print_shell_prompt(const struct ShellVariables *sv) {
     /*
     Prints the shell prompt with the format,
     <username@system: ~ >
     We're using ANSI color codes to customize the terminal
     */
+    
     char *shell_prompt = malloc(MAX_SHELL_PROMPT_LEN * sizeof(char));
-    sprintf(shell_prompt, "\033[37m<\033[m\033[31m%s\033[m\033[37m@\033[m\033[34m%s\033[m\033[37m: %s >\033[m ", sv->username, sv->hostname, sv->cwd_path);
+
+    char *cwd = malloc(MAX_PATH_LEN * sizeof(char));
+
+    // if the home path is a substring of the current path, replace the substring with '~/'
+    if(is_substring(sv->home_path, sv->cwd_path)) {
+        int j = 0;
+        cwd[j++] = '~';
+        cwd[j++] = '/';
+        for(int i = strlen(sv->home_path)+1; i < strlen(sv->cwd_path); i++) {
+            cwd[j++] = sv->cwd_path[i];
+        }
+        cwd[j] = '\0';
+    } else {
+        strcpy(cwd, sv->cwd_path);
+    }
+
+    sprintf(shell_prompt, "\033[37m<\033[m\033[31m%s\033[m\033[37m@\033[m\033[34m%s\033[m\033[37m: %s >\033[m ", sv->username, sv->hostname, cwd);
     printf("%s",shell_prompt);
+
+    free(cwd);
     free(shell_prompt);
 }
 
-void removeUnnecessarySpaces(char *str) {
+void format_string(char *dest, const char *source) {
     /*
     Removes unnecessary spaces in a string.
     [1] Trims spaces from the left to the first character
@@ -78,27 +122,28 @@ void removeUnnecessarySpaces(char *str) {
     [3] Trims extra spaces in between words/arguments
     [4] If double quotes are used, it doesn't trim the spaces in between
     [5] Also removes the newline char at the end (if present)
+    [6] Removes tabs '\t' if present (not inside double quotes)
 
     E.g.
     ` hello  world   `    -> `hello world`
     `  hello " word   !"` -> `hello " word   !"`
     */
     
-    char *buff = malloc((strlen(str)+1) * sizeof(char));
+    clear_string(dest);
 
-    int i = 0; // str index
-    int j = 0; // buffer index
+    int i = 0; // source index
+    int j = 0; // dest index
 
     // [1]
-    while(str[i] == ' ') {
+    while(source[i] == ' ') {
         i++;
     }
 
-    int last_char = -1;
+    int last_char = strlen(source)-1;
 
     // [2]
-    for(int k = strlen(str) - 1; k >= 0; k--) {
-        if(str[k] != ' ' && str[k] != '\n') {
+    for(int k = strlen(source) - 1; k >= 0; k--) {
+        if(source[k] != ' ' && source[k] != '\n') {  // [5]
             last_char = k;
             break;
         }
@@ -107,40 +152,50 @@ void removeUnnecessarySpaces(char *str) {
     // [3]
     int doubleQuoteFlag = 0; // flag for the double quote immunity
     int oneSpace = 0;        // gets incremented if 1 space is encountered
+
     while(i <= last_char) {
-        if(str[i] == '"') {  // [4]
+        if(source[i] == '"') {  // [4]
             doubleQuoteFlag = (doubleQuoteFlag == 1) ? 0 : 1; // toggle the flag
+            oneSpace = 0;
         }
 
-        if(str[i] != ' ') {
-            buff[j++] = str[i];
+        if(source[i] != ' ') {
+            dest[j++] = source[i++];
             oneSpace = 0;
         } else {
             if(oneSpace == 0 || doubleQuoteFlag) {
                 oneSpace++;
-                buff[j++] = str[i];
+                dest[j++] = source[i++];
+            } else {
+                i++;
             }
         }
-
-        i++;
     }
+    dest[i] = '\0';
+}
 
-    strcpy(str, buff);
-    free(buff);
+void shell_warning(const char *message) {
+    char *buffer = malloc((strlen(message)+50) * sizeof(char));
+    strcpy(buffer, "\n\033[33mseashell:\033[m ");
+    strcat(buffer, message);
+    strcat(buffer, "\n\n");
+    printf("%s", buffer);
+    free(buffer);
 }
 
 void run_exit() {
     char *arg = strtok(NULL, " ");
     
     if(arg != NULL) {
-        printf("\n\033[33mSeaShell:\033[m 'exit' takes no arguments\n\n");
+        shell_warning("'exit' takes no arguments");
     } else {
-        printf("\nExiting \033[34mSeaShell\033[m :)\n\n");
+        printf("\nExiting \033[34mseashell\033[m :)\n\n");
         exit(0);
     }
 }
 
 void run_echo() {
+    // TODO Handle tabs (remove them, unless in double quotes)
     char *arg = strtok(NULL, "");
 
     // handling double quotes in echo
@@ -150,51 +205,99 @@ void run_echo() {
         }
     } else {
         arg = strtok(arg, " ");
+
         while(arg != NULL) {
             printf("%s", arg);
             arg = strtok(NULL, " ");
+
             if(arg != NULL) {
                 printf(" ");
             }
         }
     }
-    
     printf("\n");
 }
 
-void processStatement(struct ShellVariables *sv, char *statement) {
-    removeUnnecessarySpaces(statement);
+void run_cd(struct ShellVariables *sv) {
+    /*
+    Usual filestructure:
+    ~/ stands for home directory (for the specific user)
+    /  stands for root directory (topmost folder)
+    ./ prefix for relative paths
 
+    If there is no argument, go to the home directory
+    If the argument is has a prefix "/", take absolute path from the root directory
+    
+    Change Directory Logic:
+    1 - Change the directory based on the given path
+    2 - Reflect those changes in the next shell prompt
+
+    */
+
+    char *arg = strtok(NULL, "");
+    if(arg == NULL || strcmp(arg, "-") == 0) {
+        // take it to root
+        chdir(sv->home_path);
+
+        if(strcmp(sv->cwd_path, sv->prev_wd_path) != 0) {
+            clear_string(sv->prev_wd_path);
+            strcpy(sv->prev_wd_path, sv->cwd_path);
+        }
+
+        clear_string(sv->cwd_path);
+        getcwd(sv->cwd_path, MAX_PATH_LEN);
+    } else {
+        chdir(arg);
+
+        if(strcmp(sv->cwd_path, sv->prev_wd_path) != 0) {
+            clear_string(sv->prev_wd_path);
+            strcpy(sv->prev_wd_path, sv->cwd_path);
+        }
+
+        clear_string(sv->cwd_path);
+        getcwd(sv->cwd_path, MAX_PATH_LEN);
+
+    }
+}
+
+void process_statement(struct ShellVariables *sv, const char *raw_statement) {
+
+    char *statement = malloc((sizeof(raw_statement) + 1) * sizeof(char));
+    format_string(statement, raw_statement);
+    
     char *command = strtok(statement, " ");
 
     if(strcmp(command, "exit") == 0) {
         run_exit();
     } else if(strcmp(command, "echo") == 0) {
         run_echo();
+    } else if(strcmp(command, "cd") == 0) {
+        run_cd(sv);
+    } else {
+        shell_warning("command not found");
     }
 }
 
-void processInput(struct ShellVariables *sv, char *input_string) {
+void process_input(struct ShellVariables *sv, char *input_string) {
     // first tokenize with respect to ; with strtok
     // then process the commands individually
-    processStatement(sv, input_string);
+    process_statement(sv, input_string);
 }
 
 int main() {
 
-    printf("\n\033[31m---\033[m \033[34mWelcome to the SeaShell!\033[m \033[31m---\033[m\n\n");
+    printf("\n\033[31m---\033[m \033[34mWelcome to the seashell!\033[m \033[31m---\033[m\n\n");
 
     struct ShellVariables *sv = malloc(sizeof(struct ShellVariables));
     init_shell_variables(sv);
 
     while(sv->loop_control) {
-        printShellPrompt(sv);
+        print_shell_prompt(sv);
 
         char *input_string = malloc(MAX_COMMAND_LEN * sizeof(char));
-        scanf("%[^\n]%*c", input_string); 
+        scanf("%[^\n]%*c", input_string);
 
-        processInput(sv, input_string);
-
+        process_input(sv, input_string);
     }
     
     free(sv);

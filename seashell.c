@@ -31,6 +31,7 @@ errno.h   - errno
 #define MAX_SHELL_PROMPT_LEN 4096
 #define MAX_PATH_LEN 2048
 #define MAX_COMMAND_LEN 2048
+#define MAX_COMMANDS_IN_ONE_LINE 50  // for when multiple commands are used with ';'
 
 struct ShellVariables {
     char *username;
@@ -343,7 +344,23 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
 void process_input(struct ShellVariables *sv, char *input_string) {
     // first tokenize with respect to ; with strtok
     // then process the commands individually
-    process_statement(sv, input_string);
+
+    char **command_list = malloc(MAX_COMMANDS_IN_ONE_LINE * sizeof(char*));
+    char *command = strtok(input_string, ";");
+
+    int i = 0;
+    while(command != NULL) {
+        command_list[i] = malloc(MAX_COMMAND_LEN * sizeof(char));
+        strcpy(command_list[i], command);
+        command = strtok(NULL, ";");
+        i++;
+    }
+
+    for(int j = 0; j < i; j++) {
+        process_statement(sv, command_list[j]);
+    }
+
+    free(command_list);
 }
 
 int main() {

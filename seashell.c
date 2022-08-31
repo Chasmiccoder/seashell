@@ -74,7 +74,8 @@ void init_shell_variables(struct ShellVariables *sv) {
     getcwd(sv->cwd_path, MAX_PATH_LEN);
 
     sv->prev_wd_path = malloc(MAX_PATH_LEN * sizeof(int));
-    strcpy(sv->prev_wd_path, sv->cwd_path);
+    // strcpy(sv->prev_wd_path, sv->cwd_path);
+    sv->prev_wd_path[0] = '\0';
 
     sv->home_path = malloc(MAX_PATH_LEN * sizeof(int));
     strcpy(sv->home_path, sv->cwd_path);
@@ -226,18 +227,33 @@ void run_cd(struct ShellVariables *sv) {
     ./ prefix for relative paths
 
     If there is no argument, go to the home directory
-    If the argument is has a prefix "/", take absolute path from the root directory
+    If the argument is '-', go to the previous directory
     
     Change Directory Logic:
     1 - Change the directory based on the given path
     2 - Reflect those changes in the next shell prompt
 
+    This approach is easier as we don't have to handle '.' '..' './' '/',
+    as chdir does that for us. We display the path with respect to the root 
+    by checking if the absolute path of the current working directory has the absolute path
+    of the home directory (of the shell) as a substring.
+
     */
 
+    // TODO: handle case in which more than 1 arg is passed
     char *arg = strtok(NULL, "");
-    if(arg == NULL || strcmp(arg, "-") == 0) {
-        // take it to root
-        chdir(sv->home_path);
+    if(arg == NULL || strcmp(arg, "~") == 0 || strcmp(arg, ".") == 0) {
+
+        if(strcmp(sv->cwd_path, sv->home_path) == 0) {
+            return;
+        }
+
+        // take it to home
+        int status = chdir(sv->home_path);
+        if(status == -1) {
+            shell_warning("no such file or directory");
+            return;
+        }
 
         if(strcmp(sv->cwd_path, sv->prev_wd_path) != 0) {
             clear_string(sv->prev_wd_path);
@@ -245,19 +261,61 @@ void run_cd(struct ShellVariables *sv) {
         }
 
         clear_string(sv->cwd_path);
-        getcwd(sv->cwd_path, MAX_PATH_LEN);
+        strcpy(sv->cwd_path, sv->home_path);
+
+    } else if(strcmp(arg, "-") == 0) {
+
+        int status = chdir(sv->prev_wd_path);
+        if(status == -1) {
+            shell_warning("no such file or directory");
+            return;
+        }
+
+        printf("%s\n", sv->prev_wd_path);
+
+        if(strcmp(sv->cwd_path, sv->prev_wd_path) != 0) {
+            char *tmp_path = malloc(MAX_PATH_LEN * sizeof(char));
+            strcpy(tmp_path, sv->cwd_path);
+
+            clear_string(sv->cwd_path);
+            strcpy(sv->cwd_path, sv->prev_wd_path);
+
+            clear_string(sv->prev_wd_path);
+            strcpy(sv->prev_wd_path, tmp_path);
+
+            free(tmp_path);
+        }
     } else {
-        chdir(arg);
 
-        if(strcmp(sv->cwd_path, sv->prev_wd_path) != 0) {
+        int status = chdir(arg);
+        if(status == -1) {
+            shell_warning("no such file or directory");
+            return;
+        }
+
+        if(strcmp(sv->prev_wd_path, sv->cwd_path) != 0) {
             clear_string(sv->prev_wd_path);
             strcpy(sv->prev_wd_path, sv->cwd_path);
         }
 
         clear_string(sv->cwd_path);
         getcwd(sv->cwd_path, MAX_PATH_LEN);
-
     }
+}
+
+void run_pwd(const struct ShellVariables *sv) {
+
+    char *arg = strtok(NULL, "");
+    if(arg != NULL) {
+        shell_warning("'pwd' takes no arguments");
+        return;
+    }
+
+    printf("%s\n", sv->cwd_path);
+}
+
+void run_clear() {
+    system("clear");
 }
 
 void process_statement(struct ShellVariables *sv, const char *raw_statement) {
@@ -273,6 +331,10 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
         run_echo();
     } else if(strcmp(command, "cd") == 0) {
         run_cd(sv);
+    } else if(strcmp(command, "pwd") == 0) {
+        run_pwd(sv);
+    } else if(strcmp(command, "clear") == 0) {
+        run_clear();
     } else {
         shell_warning("command not found");
     }
@@ -286,7 +348,7 @@ void process_input(struct ShellVariables *sv, char *input_string) {
 
 int main() {
 
-    printf("\n\033[31m---\033[m \033[34mWelcome to the seashell!\033[m \033[31m---\033[m\n\n");
+    printf("\n\033[31m---\033[m \033[34mWelcome to seashell!\033[m \033[31m---\033[m\n\n");
 
     struct ShellVariables *sv = malloc(sizeof(struct ShellVariables));
     init_shell_variables(sv);

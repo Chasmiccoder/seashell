@@ -15,6 +15,7 @@ make sure to fully tokenize a string before moving on to another segment (when u
 Bugs:
 handle tabs (echo)
 echo echo not working
+echo "hello   world" asklas asas fasf - not working
 
 
 

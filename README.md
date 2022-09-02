@@ -1,19 +1,26 @@
-# seashell
+# seashell 🐚
 A simple shell written in C :)
 
 
-Features:
-exit
-echo (handling quotes as well)
+## Features
+* exit  
+* echo (handling quotes as well)  
+* clear  
+* pwd  
+* cd (with flags like '.' '..' './' '/' '~/')  
 
 
-TODOS:
-make sure to handle all TODOs within the project
-make sure to deallocate dynamically allocated memory
-make sure to fully tokenize a string before moving on to another segment (when using strtok) [or save it to a buffer]
+
+
+
+### Dev Corner -
+Keep in mind:  
+make sure to handle all TODOs within the project  
+make sure to deallocate dynamically allocated memory  
+make sure to fully tokenize a string before moving on to another segment (when using strtok) [or save it to a buffer]  
 
 Bugs/Features
-handle tabs (echo)
+handle tabs (echo) [remove all tabs]
 echo echo not working
 echo "hello   world" asklas asas fasf - not working
 If someone gives ~/dir, it should take it as ~ (home) as the location of the shell

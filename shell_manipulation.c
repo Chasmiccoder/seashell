@@ -71,7 +71,7 @@ void print_shell_prompt(const struct ShellVariables *sv) {
 
 void shell_warning(const char *message) {
     char *buffer = malloc((strlen(message)+50) * sizeof(char));
-    strcpy(buffer, "\n\033[33mseashell:\033[m ");
+    strcpy(buffer, "\n🐚 \033[33mseashell:\033[m ");
     strcat(buffer, message);
     strcat(buffer, "\n\n");
     printf("%s", buffer);

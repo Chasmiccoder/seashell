@@ -11,7 +11,7 @@ void run_exit() {
     if(arg != NULL) {
         shell_warning("'exit' takes no arguments");
     } else {
-        printf("\nExiting \033[34mseashell\033[m :)\n\n");
+        printf("\n🐚 Exiting \033[34mseashell\033[m :)\n\n");
         exit(0);
     }
 }

@@ -48,6 +48,8 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
         run_pwd(sv);
     } else if(strcmp(command, "clear") == 0) {
         run_clear();
+    } else if(strcmp(command, "ls") == 0) {
+        run_ls(sv);
     } else {
         shell_warning("command not found");
     }
@@ -80,7 +82,7 @@ void process_input(struct ShellVariables *sv, char *input_string) {
 
 int main() {
 
-    printf("\n\033[31m---\033[m \033[34mWelcome to seashell!\033[m \033[31m---\033[m\n\n");
+    printf("\n🐚 \033[31m---\033[m \033[34mWelcome to seashell!\033[m \033[31m---\033[m 🐚\n\n");
 
     struct ShellVariables *sv = malloc(sizeof(struct ShellVariables));
     init_shell_variables(sv);

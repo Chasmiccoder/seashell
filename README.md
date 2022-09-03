@@ -25,4 +25,7 @@ echo echo not working
 echo "hello   world" asklas asas fasf - not working
 If someone gives ~/dir, it should take it as ~ (home) as the location of the shell
 
+For ls `ls world dir -l -l -a -la folder1` not working
 
+
+cd ~/dir is not working

@@ -13,6 +13,8 @@ int main() {
     char ch2[] = "hello\0";
     printf("\n%d\n", is_substring(ch1, ch2));
 
+    
+
 
 
 

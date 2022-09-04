@@ -30,3 +30,16 @@ For ls `ls world dir -l -l -a -la folder1` not working
 
 cd ~/dir is not working
 
+check const-argument consistency
+
+
+The specifications say - "You do not have to handle background processing for built-in commands (ls, echo, cd, pwd, pinfo). Commands not implemented by you should be runnable in the background."
+In the future, handle this propery. Custom commands will be used normally, and when & is involved, use system() for it.
+
+
+mkdir works for upto 2 args, but not more
+Error is around `char **arguments = malloc(MAX_NUMBER_OF_ARGS * sizeof(char*));` in system_commands.c
+Error is regardingnumber of chars in total
+
+`mkdir q1 q2 q3 q4 q5 q6 q7 q8 q9 q10` doesn't work
+`mkdir o1 o2 o3 o4 o5` works

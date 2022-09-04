@@ -13,28 +13,21 @@
 #include "../globals.h"
 #include "../utils.h"
 #include "../shell_manipulation.h"
-// #include "commands.h"
-
 
 #define MAX_LS_ARGS 25
 #define NUM_FLAGS_SUPPORTED 4
-
 
 /*
 For the flag bitmap, 
 Array Index to Flag Convention:
 0 = -l
 1 = -a
-2 = -la
-3 = -al
 */
 
 #define FLAG_BITMAP_l 0
 #define FLAG_BITMAP_a 1
 
 #define MAX_LS_INFO_LEN 50
-
-
 
 void init_flag_bitmap(int *flag_bitmap) {
     for(int i = 0; i < NUM_FLAGS_SUPPORTED; i++) {
@@ -68,32 +61,6 @@ struct directory_info {
     char **names;
     char **colored_names;
 };
-
-void string_to_lower(char *string) {
-    for(int i = 0; i < strlen(string); i++) {
-        if(string[i] >= 'A' && string[i] <= 'Z') {
-            string[i] = string[i] + 32;
-        }
-    }
-}
-
-void string_swap(char *str1, char *str2) {
-    char *buffer = malloc(MAX_LS_INFO_LEN * sizeof(char));
-
-    strcpy(buffer, str1);
-    clear_string(str1);
-    strcpy(str1, str2);
-    clear_string(str2);
-    strcpy(str2, buffer);
-
-    free(buffer);
-}
-
-void int_swap(int *num1, int *num2) {
-    int tmp = *num1;
-    *num1 = *num2;
-    *num2 = tmp;
-}
 
 void directory_info_swap(struct directory_info *data, int i, int j) {
 
@@ -195,7 +162,8 @@ void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct Sh
     // first check whether the argument is a file or a directory
     struct stat arg_stats;
     if(stat(argument, &arg_stats) != 0) {
-        shell_warning("stat gone wrong during ls");
+        shell_warning("no such file or directory");
+        return;
     } else if (st_mode_check(arg_stats, S_IFDIR) == 0) {
 
         char *filename = malloc(MAX_LS_INFO_LEN * sizeof(char));
@@ -222,6 +190,7 @@ void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct Sh
         sprintf(buff, "could not open '%s'", argument);
         shell_warning(buff);
         free(buff);
+        return;
     }
 
     printf("ls on: %s\n", argument);
@@ -260,7 +229,8 @@ void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct Sh
         strcpy(file_path, file->d_name);
 
         if(stat(file_path, &file_stats) != 0) {
-            shell_warning("stat gone wrong during ls");
+            shell_warning("no such file or directory");
+            return;
         } else {
             
             get_permissions(data, file_stats, i);
@@ -315,12 +285,11 @@ void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct Sh
 
     printf("\n");
 
+    chdir(previous_path);
+
     free_directory_info(data, number_of_files);
     closedir(directory);
     free(previous_path);
-
-    chdir(previous_path);
-
 }
 
 

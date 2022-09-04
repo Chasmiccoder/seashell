@@ -6,6 +6,13 @@
 #define COLOR_BLUE  1
 #define COLOR_GREEN 2
 
+long long max(long long num1, long long num2) {
+    if(num1 > num2) {
+        return num1;
+    }
+    return num2;
+}
+
 void clear_string(char *str) {
     memset(str, '\0', strlen(str) * sizeof(char));
 }
@@ -102,4 +109,31 @@ void add_color_to_string(char *string, int color_code) {
     }
 
     free(buffer);
+}
+
+void string_to_lower(char *string) {
+    for(int i = 0; i < strlen(string); i++) {
+        if(string[i] >= 'A' && string[i] <= 'Z') {
+            string[i] = string[i] + 32;
+        }
+    }
+}
+
+void string_swap(char *str1, char *str2) {
+    int len = max(strlen(str1) + 1, strlen(str2) + 1);
+    char *buffer = malloc(len * sizeof(char));
+
+    strcpy(buffer, str1);
+    clear_string(str1);
+    strcpy(str1, str2);
+    clear_string(str2);
+    strcpy(str2, buffer);
+
+    free(buffer);
+}
+
+void int_swap(int *num1, int *num2) {
+    int tmp = *num1;
+    *num1 = *num2;
+    *num2 = tmp;
 }

@@ -51,8 +51,11 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
     } else if(strcmp(command, "ls") == 0) {
         run_ls(sv);
     } else {
-        shell_warning("command not found");
+        // shell_warning("command not found");
+        run_system_command(command, sv);
     }
+
+    free(statement);
 }
 
 void process_input(struct ShellVariables *sv, char *input_string) {

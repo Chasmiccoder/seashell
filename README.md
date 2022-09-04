@@ -29,3 +29,4 @@ For ls `ls world dir -l -l -a -la folder1` not working
 
 
 cd ~/dir is not working
+

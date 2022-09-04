@@ -1,4 +1,10 @@
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#define COLOR_WHITE 0
+#define COLOR_BLUE  1
+#define COLOR_GREEN 2
 
 void clear_string(char *str) {
     memset(str, '\0', strlen(str) * sizeof(char));
@@ -76,4 +82,24 @@ void format_string(char *dest, const char *source) {
         }
     }
     dest[i] = '\0';
+}
+
+void add_color_to_string(char *string, int color_code) {
+    char *buffer = malloc((strlen(string)+15) * sizeof(char));
+
+    if(color_code == COLOR_WHITE) {
+        sprintf(buffer, "\033[37m%s\033[m", string);
+        clear_string(string);
+        strcpy(string, buffer);
+    } else if(color_code == COLOR_BLUE) {
+        sprintf(buffer, "\033[34m%s\033[m", string);
+        clear_string(string);
+        strcpy(string, buffer);
+    } else if(color_code == COLOR_GREEN) {
+        sprintf(buffer, "\033[32m%s\033[m", string);
+        clear_string(string);
+        strcpy(string, buffer);
+    }
+
+    free(buffer);
 }

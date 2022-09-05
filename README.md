@@ -43,3 +43,15 @@ Error is regardingnumber of chars in total
 
 `mkdir q1 q2 q3 q4 q5 q6 q7 q8 q9 q10` doesn't work
 `mkdir o1 o2 o3 o4 o5` works
+
+Not sure if this is a bug or feature, but if gedit is already open, then running `gedit` will not run it as a foreground process
+
+
+Print `took 3 seconds` in prompt (foreground thing)
+& getting passed as arg to gedit
+
+Test multiple statements with &
+
+Need to handle ~/dir in ls and cd
+
+If gedit & and then close gedit and then sleep 2, then the foreground process does not happen

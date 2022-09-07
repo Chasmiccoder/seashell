@@ -15,7 +15,7 @@
 #include "../shell_manipulation.h"
 
 #define MAX_LS_ARGS 25
-#define NUM_FLAGS_SUPPORTED 4
+#define NUM_LS_FLAGS_SUPPORTED 4  // -l, -a, -la, -al
 
 /*
 For the flag bitmap, 
@@ -24,13 +24,13 @@ Array Index to Flag Convention:
 1 = -a
 */
 
-#define FLAG_BITMAP_l 0
-#define FLAG_BITMAP_a 1
+#define FLAG_BITMAP_LS_l 0
+#define FLAG_BITMAP_LS_a 1
 
 #define MAX_LS_INFO_LEN 50
 
-void init_flag_bitmap(int *flag_bitmap) {
-    for(int i = 0; i < NUM_FLAGS_SUPPORTED; i++) {
+void init_ls_flag_bitmap(int *flag_bitmap) {
+    for(int i = 0; i < NUM_LS_FLAGS_SUPPORTED; i++) {
         flag_bitmap[i] = 0;
     }
 }
@@ -219,7 +219,7 @@ void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct Sh
     while((file = readdir(directory)) != NULL) {
 
         // handling flag: -a
-        if(flag_bitmap[FLAG_BITMAP_a] == 0 && file->d_name[0] == '.') {
+        if(flag_bitmap[FLAG_BITMAP_LS_a] == 0 && file->d_name[0] == '.') {
             continue;
         }
 
@@ -276,7 +276,7 @@ void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct Sh
 
     for(int i = 0; i < number_of_files_to_display; i++) {
         // handling flag: -l
-        if(flag_bitmap[FLAG_BITMAP_l] == 1) {
+        if(flag_bitmap[FLAG_BITMAP_LS_l] == 1) {
             printf("%s %d %s %s %d %s %s\n", data->permissions[i], data->link_counts[i], data->owners[i], data->groups[i], data->sizes[i], data->modification_timestamps[i], data->colored_names[i]);
         } else {
             printf("%s\n", data->colored_names[i]);
@@ -347,8 +347,8 @@ void run_ls(const struct ShellVariables *sv) {
     char **arguments = malloc(MAX_LS_ARGS * sizeof(char*));
     int i = 0;
 
-    int *flag_bitmap = malloc(NUM_FLAGS_SUPPORTED * sizeof(int));
-    init_flag_bitmap(flag_bitmap);
+    int *flag_bitmap = malloc(NUM_LS_FLAGS_SUPPORTED * sizeof(int));
+    init_ls_flag_bitmap(flag_bitmap);
 
 
     // if no argument is given, add '.' as an argument
@@ -363,21 +363,21 @@ void run_ls(const struct ShellVariables *sv) {
             
             if(strcmp(arg, "-l") == 0) {
               
-                flag_bitmap[FLAG_BITMAP_l] = 1;
+                flag_bitmap[FLAG_BITMAP_LS_l] = 1;
 
             } else if(strcmp(arg, "-a") == 0) {
               
-                flag_bitmap[FLAG_BITMAP_a] = 1;
+                flag_bitmap[FLAG_BITMAP_LS_a] = 1;
             
             } else if(strcmp(arg, "-la") == 0) {
 
-                flag_bitmap[FLAG_BITMAP_l] = 1;
-                flag_bitmap[FLAG_BITMAP_a] = 1;
+                flag_bitmap[FLAG_BITMAP_LS_l] = 1;
+                flag_bitmap[FLAG_BITMAP_LS_a] = 1;
             
             } else if(strcmp(arg, "-al") == 0) {
 
-                flag_bitmap[FLAG_BITMAP_l] = 1;
-                flag_bitmap[FLAG_BITMAP_a] = 1;
+                flag_bitmap[FLAG_BITMAP_LS_l] = 1;
+                flag_bitmap[FLAG_BITMAP_LS_a] = 1;
             
             } else {
                 arguments[i] = malloc(MAX_PATH_LEN * sizeof(char*));

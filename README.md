@@ -69,3 +69,12 @@ Write custom function in shell_manip.c
 NEED to do error handling with perror
 
 The user can type in any command, including, ./a.out, which starts a new process out of your shell program. (Testing is left)
+
+We can reduce redundancy/modularize more. E.g. init_ls_flag_bitmap and init_discover_flag_bitmap do the same thing.
+
+create a function that processes the paths before feeding them directly. This is to account for using ~/ as the shell directory
+
+study links
+
+### Potential future bugs
+Multiple commands with ; might get messed up because of same var names

@@ -77,6 +77,7 @@ void run_history(const struct ShellVariables *sv) {
         }
     }
 
+    // accessing sv this way, because we're modifying a struct, contained in a struct (modification of pointer to pointer)
     if(num_commands > (*sv->command_buffer)->size) {
         num_commands = (*sv->command_buffer)->size;
     }

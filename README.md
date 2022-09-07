@@ -55,3 +55,14 @@ Test multiple statements with &
 Need to handle ~/dir in ls and cd
 
 If gedit & and then close gedit and then sleep 2, then the foreground process does not happen
+
+REDO specification 4
+
+Create a path handler that takes care of relative home ~
+
+
+We won't need so many malloc statements. Since we're using macros
+
+Need to free shell variables (sv) properly.
+Write custom function in shell_manip.c
+

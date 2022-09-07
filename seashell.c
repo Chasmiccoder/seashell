@@ -50,7 +50,10 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
         run_clear();
     } else if(strcmp(command, "ls") == 0) {
         run_ls(sv);
-    } else {
+    } else if(strcmp(command, "history") == 0) {
+        run_history(sv);
+    }
+    else {
         // shell_warning("command not found");
         run_system_command(command, sv);
     }

@@ -13,7 +13,7 @@
 
 // int global_number_of_processes = 1;
 
-
+// TODO: Can be done without using shellvariables
 void run_system_command(char *command_, struct ShellVariables *sv) {
 
     char **arguments = malloc(MAX_NUMBER_OF_ARGS * sizeof(char*));
@@ -23,11 +23,15 @@ void run_system_command(char *command_, struct ShellVariables *sv) {
     strcpy(arguments[i], command_);
     i++;
 
+    int is_background_process = 0;
+
     char *arg = strtok(NULL, " ");
     while(arg != NULL) {
         
         if(strcmp(arg, "&") == 0) {
-
+            is_background_process = 1;
+            arg = strtok(NULL, " ");
+            continue;
         }
 
         arguments[i] = malloc(MAX_PATH_LEN * sizeof(char));
@@ -37,10 +41,10 @@ void run_system_command(char *command_, struct ShellVariables *sv) {
         i++;
     }
 
-    int is_background_process = 0;
-    if(i != 0 && strcmp(arguments[i-1], "&") == 0) {
-        is_background_process = 1;
-    }
+    
+    // if(i != 0 && strcmp(arguments[i-1], "&") == 0) {
+    //     is_background_process = 1;
+    // }
 
     arguments[i] = malloc(MAX_PATH_LEN * sizeof(char));
     arguments[i] = NULL;

@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "stdio.h": "c",
-        "errno.h": "c",
-        "dirent.h": "c"
-    }
-}

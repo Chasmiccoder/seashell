@@ -8,11 +8,11 @@ struct ShellVariables {
     char *home_path;     // absolute path to the home directory (where this shell is stored)
 
     int loop_control;
-    
-    char **command_queue;  // stores command history as a circular list
-    int command_queue_front;
-    int command_queue_rear;
+
+    struct queue **command_buffer;
 };
+
+
 
 void init_shell_variables(struct ShellVariables *sv);
 void print_shell_prompt(const struct ShellVariables *sv);

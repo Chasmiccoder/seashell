@@ -66,3 +66,6 @@ We won't need so many malloc statements. Since we're using macros
 Need to free shell variables (sv) properly.
 Write custom function in shell_manip.c
 
+NEED to do error handling with perror
+
+The user can type in any command, including, ./a.out, which starts a new process out of your shell program. (Testing is left)

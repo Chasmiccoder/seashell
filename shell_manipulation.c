@@ -5,21 +5,8 @@
 
 #include "globals.h"
 #include "utils.h"
-
-
-struct ShellVariables {
-    char *username;
-    char *hostname;
-    char *cwd_path;      // current working directory path
-    char *prev_wd_path;  // previous working directory path
-    char *home_path;     // absolute path to the home directory (where this shell is stored)
-
-    int loop_control;
-    
-    char **command_queue;  // stores command history as a circular list
-    int command_queue_front;
-    int command_queue_rear;
-};
+#include "datastructures.h"
+#include "shell_manipulation.h"
 
 void init_shell_variables(struct ShellVariables *sv) {
     /* --- Fetch the username and the hostname --- */
@@ -41,35 +28,8 @@ void init_shell_variables(struct ShellVariables *sv) {
 
     sv->loop_control = 1;
 
-    sv->command_queue = malloc(MAX_COMMANDS_IN_HISTORY * sizeof(char*));
-    for(int i = 0; i < MAX_COMMANDS_IN_HISTORY; i++) {
-        sv->command_queue[i] = malloc(MAX_COMMAND_LEN * sizeof(char));
-        // sv->command_queue[i] = 'a' + i;
-    }
-
-    sv->command_queue_front = 0;
-    sv->command_queue_rear  = 0;
-
-
-
-    // strcpy(sv->command_queue[0], "hi");
-    // strcpy(sv->command_queue[1], "lo");
-    // strcpy(sv->command_queue[2], "world");
-    // sv->command_queue_rear = 2;
-
-    // strcpy(sv->command_queue[18], "last one");
-    // strcpy(sv->command_queue[19], "standing");
-    // sv->command_queue_front = 18;
-
-    strcpy(sv->command_queue[2], "hi");
-    strcpy(sv->command_queue[3], "lo");
-    strcpy(sv->command_queue[4], "wrld");
-    strcpy(sv->command_queue[5], "hiiii");
-    sv->command_queue_front = 2;
-    sv->command_queue_rear = 5;
-
-
-
+    sv->command_buffer = malloc(sizeof(struct queue*));
+    init_queue(sv->command_buffer);
 }
 
 void print_shell_prompt(const struct ShellVariables *sv) {

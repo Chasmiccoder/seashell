@@ -4,19 +4,46 @@
 #include <string.h>
 
 #include "../globals.h"
+#include "../utils.h"
+#include "../datastructures.h"
 #include "../shell_manipulation.h"
 
-void add_command_to_history(struct ShellVariables *sv, char *command) {
+void add_command_to_history(struct ShellVariables *sv, const char *command) {
     /*
-    Cases:
-    Search for the command in the queue
-    If it is not present, add it at the rear
-    If it is not present, but the queue is already full, change the front 
-    pointer to "delete" the oldest element, and then add the new element to the rear
-
-    If it is present, then delete it from the queue. Shift remaining elements accordingly, 
-    and then do as mentioned above to add it to the queue
+    We're maintaining a 'moving' queue with nodes
+    Push the command at the rear, if it is not the last command
+    If the size exceeds the buffer limit, then update the front of the queue and free the deleted element
     */
+
+    struct queue **Q = sv->command_buffer;
+
+
+    if((*Q)->size  == 0) {
+        strcpy((*Q)->rear->string, command);
+        (*Q)->size++;
+        return;
+    }
+
+    if(strcmp((*Q)->rear->string, command) == 0) {
+        return;
+    }
+
+    struct string_node *element = malloc(sizeof(struct string_node));
+    element->string = malloc(MAX_COMMAND_LEN * sizeof(char));
+    strcpy(element->string, command);
+    element->next = NULL;
+    
+    (*Q)->rear->next = element;
+    (*Q)->rear = element;
+
+    if((*Q)->size < MAX_COMMANDS_IN_HISTORY) {
+        (*Q)->size++;
+    } else {
+        struct string_node *element = (*Q)->front;
+        (*Q)->front = (*Q)->front->next;
+        free(element->string);
+        free(element);
+    }
 }
 
 void run_history(const struct ShellVariables *sv) {
@@ -28,20 +55,9 @@ void run_history(const struct ShellVariables *sv) {
 
     While printing, we want to print in reverse chronological order, so print the
     queue from the rear to the front
-    
     */
     
     char *arg = strtok(NULL, " ");
-
-    int size = 0;
-    int front = sv->command_queue_front;
-    int rear  = sv->command_queue_rear;
-
-    if(front > rear) {
-        size = (MAX_COMMANDS_IN_HISTORY - front) + (rear+1);
-    } else {
-        size = rear - front + 1;
-    }
 
     int num_commands = 10;
     if(arg != NULL) {
@@ -61,35 +77,22 @@ void run_history(const struct ShellVariables *sv) {
         }
     }
 
-    if(num_commands > size) {
-        num_commands = size;
+    if(num_commands > (*sv->command_buffer)->size) {
+        num_commands = (*sv->command_buffer)->size;
     }
 
     int i = 0;
-    
-    // printf("F: %d\nR: %d\n", front, rear);
-    // printf("size: %d\n", size);
-    // printf("num comm: %d\n", num_commands);
-    // printf("aa  %d\n", j);
-
-    int j = MAX_COMMANDS_IN_HISTORY-1;
-
-    while(i < num_commands) {
-        if(front <= rear) {
-            printf("%d  %s\n", i+1, sv->command_queue[rear-i]);
-        } else {
-            if(rear-i >= 0) {
-                int index = rear - i;
-                printf("%d  %s\n", i+1, sv->command_queue[index]);
-            } else {
-                int index = j;
-                printf("%d  %s\n",  i+1, sv->command_queue[index]);
-                j--;
-            }
-        }
+    struct string_node *current = (*sv->command_buffer)->front;
+    while(i < (*sv->command_buffer)->size - num_commands) {
+        current = current->next;
         i++;
     }
 
+    int count = 1;
+    while(current->next != NULL) {
+        printf("%d  %s\n", count++, current->string);
+        current = current->next;
+    }
 
-
+    printf("%d  %s\n", count, current->string);
 }

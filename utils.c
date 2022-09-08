@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "shell_manipulation.h"
+
 #define COLOR_WHITE 0
 #define COLOR_BLUE  1
 #define COLOR_GREEN 2
@@ -136,4 +138,28 @@ void int_swap(int *num1, int *num2) {
     int tmp = *num1;
     *num1 = *num2;
     *num2 = tmp;
+}
+
+int handle_system_call(int status, char *system_call) {
+    if(strcmp(system_call, "chdir") == 0) {
+        if(status != 0) {
+            shell_warning("runtime error at chdir()\n");
+            return -1;
+        }
+    }
+    // success
+    return 0;
+}
+
+void prepend_string(const char *prefix, char *string) {
+
+    char *tmp = malloc((strlen(string) + strlen(prefix) + 1) * sizeof(char));
+
+    printf("pre, str: %s %s\n", prefix, string);
+    strcpy(tmp, prefix);
+    strcat(tmp, string);
+    clear_string(string);
+    strcpy(string, tmp);
+    printf("str str: %s\n", string);
+    free(tmp);
 }

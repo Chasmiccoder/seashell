@@ -5,10 +5,11 @@
 #include <unistd.h>
 
 #include "../globals.h"
+#include "../utils.h"
 #include "../shell_manipulation.h"
 
-#define MAX_DISCOVER_ARGS 4
-#define NUM_DISCOVER_FLAGS_SUPPORTED 4  // -d, -f, -df, -fd
+#define MAX_DISCOVER_ARGS 25            // incase flags are repeated
+#define NUM_DISCOVER_FLAGS_SUPPORTED 2  // -d, -f
 
 /*
 For the flag bitmap, 
@@ -34,66 +35,113 @@ void init_discover_flag_bitmap(int *flag_bitmap) {
     }
 }
 
-void scan_directory(const char *targetdir, struct discover_info *data, char *targetfile, char *target_file_path, int is_recursive){
+int check_if_outlier(const char *filename) {
+    char *outliers[] = {".", "..", ".git", ".vscode"};
+    size_t size = sizeof(outliers) / sizeof(outliers[0]);
+
+    for(int i = 0; i < size; i++) {
+        if(strcmp(filename, outliers[i]) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void scan_directory(char *targetdir, const char *targetfile, char *target_file_path, struct discover_info *data, const int *flag_bitmap, const int is_recursive){
     /*
     If is_recursive is true, then scan the directory recursively
+    targetdir = directory to search under
+    targetfile = file to search for
+    target_file_path = char array to store the path of the target file
     */
 
-    chdir(targetdir);
-
     DIR *directory = opendir(targetdir);
+
+    int status = chdir(targetdir);
+    if(handle_system_call(status, "chdir") != 0) {
+        return;
+    }
 
     if(directory == NULL) {
         shell_warning("no such directory exists");
         return;
     }
 
-    
-    struct dirent *file;
-
-    file = readdir(directory);
-    while(file != NULL) {
-        if(targetfile != NULL && target_file_path != NULL && strcmp(targetfile, file->d_name) == 0) {
-            
-            char tmp[MAX_PATH_LEN];
-            getcwd(tmp, MAX_PATH_LEN);
-            strcpy(target_file_path, tmp);
-            strcat(target_file_path, "/");
-            strcat(target_file_path, targetfile);
-
-            return;
-        }
-
-        if(data->size < MAX_DISCOVER_ENTITIES) {
-            if(strcmp(file->d_name, ".") == 0 || strcmp(file->d_name, "..") == 0 || strcmp(file->d_name, ".git") == 0 || strcmp(file->d_name, ".vscode") == 0) {  // removing .git and .vscode folders because they contain too many sub structures. Later on, we can use an array of strings named 'outliers' to handle this
-                file = readdir(directory);
-                continue;
-            }
-
-            data->entities[data->size] = malloc(MAX_PATH_LEN * sizeof(char));
-            strcpy(data->entities[data->size], file->d_name);
-
-            if(file->d_type == DT_DIR) {
-                data->types[data->size] = 1;
-            } else {
-                data->types[data->size] = 0;
-            }
-
-            data->size++;
-
-            if(is_recursive && data->types[data->size-1] == 1  && strcmp(file->d_name, ".") != 0 && strcmp(file->d_name, "..") != 0) {
-                char path[MAX_PATH_LEN];
-                strcpy(path, targetdir);
-                strcat(path, "/");
-                strcat(path, file->d_name);
-
-                // scan_directory(path, data, is_recursive);
-                scan_directory(path, data, targetfile, target_file_path, is_recursive);
-            }
-        }
-        
+    // discover <dir_path> <file_path>
+    if(data == NULL) {
+        struct dirent *file;
         file = readdir(directory);
+        while(file != NULL) {
 
+            if(strcmp(targetfile, file->d_name) == 0) {
+                char tmp[MAX_PATH_LEN];
+                getcwd(tmp, MAX_PATH_LEN);
+                strcpy(target_file_path, tmp);
+                strcat(target_file_path, "/");
+                strcat(target_file_path, targetfile);
+            }
+
+            if(is_recursive && file->d_type == DT_DIR && !check_if_outlier(file->d_name)) {
+                char path[MAX_PATH_LEN];
+                strcpy(path, file->d_name);
+
+                scan_directory(path, targetfile, target_file_path, data, flag_bitmap, is_recursive);
+                
+                // after the recursive call, go back 1 directory
+                int status = chdir("../");
+                handle_system_call(status, "chdir");
+                if(status != 0) {
+                    return;
+                }
+            }
+            file = readdir(directory);
+        }
+    } else {
+
+        struct dirent *file;
+        file = readdir(directory);
+        while(file != NULL) {
+            if(file->d_type == DT_DIR && flag_bitmap[FLAG_BITMAP_DISCOVER_d] && !check_if_outlier(file->d_name)) {
+                // add directory to data
+
+                char tmp[MAX_PATH_LEN];
+                getcwd(tmp, MAX_PATH_LEN);
+                strcat(tmp, "/");
+                strcat(tmp, file->d_name);
+
+                data->entities[data->size] = malloc(MAX_PATH_LEN * sizeof(char));
+                strcpy(data->entities[data->size], tmp);
+                data->size++;
+            
+            } else if(file->d_type != DT_DIR && flag_bitmap[FLAG_BITMAP_DISCOVER_f]) {
+                // add file to data
+
+                char tmp[MAX_PATH_LEN];
+                getcwd(tmp, MAX_PATH_LEN);
+                strcat(tmp, "/");
+                strcat(tmp, file->d_name);
+
+                data->entities[data->size] = malloc(MAX_PATH_LEN * sizeof(char));
+                strcpy(data->entities[data->size], tmp);
+                data->size++;
+
+            }
+
+            if(is_recursive && file->d_type == DT_DIR && !check_if_outlier(file->d_name)) {
+                char path[MAX_PATH_LEN];
+                strcpy(path, file->d_name);
+
+                scan_directory(path, targetfile, target_file_path, data, flag_bitmap, is_recursive);
+                
+                // after the recursive call, go back 1 directory
+                int status = chdir("../");
+                handle_system_call(status, "chdir");
+                if(status != 0) {
+                    return;
+                }
+            }
+            file = readdir(directory);
+        }
     }
 
     closedir(directory);
@@ -111,12 +159,14 @@ void run_discover(const struct ShellVariables *sv) {
     Note:
     If no paths are given, this will print all files in the current directory
     If 1 path is given, it will be assumed to be the target directory
-    
+    If -d or -f are passed, the target file argument is ignored
+
     arguments[0] is the target directory, and arguments[1] is the target file
 
     */
     char *previous_path = malloc(MAX_PATH_LEN * sizeof(char));
     strcpy(previous_path, sv->cwd_path);
+    
 
     char *arg = strtok(NULL, " ");
 
@@ -140,16 +190,6 @@ void run_discover(const struct ShellVariables *sv) {
 
                 flag_bitmap[FLAG_BITMAP_DISCOVER_f] = 1;
             
-            } else if(strcmp(arg, "-df") == 0) {
-
-                flag_bitmap[FLAG_BITMAP_DISCOVER_d] = 1;
-                flag_bitmap[FLAG_BITMAP_DISCOVER_f] = 1;
-            
-            } else if(strcmp(arg, "-fd") == 0) {
-
-                flag_bitmap[FLAG_BITMAP_DISCOVER_d] = 1;
-                flag_bitmap[FLAG_BITMAP_DISCOVER_f] = 1;
-            
             } else {
                 arguments[i] = malloc(MAX_PATH_LEN * sizeof(char*));
                 strcpy(arguments[i], arg);
@@ -163,9 +203,11 @@ void run_discover(const struct ShellVariables *sv) {
     // no path given, but at least one flag is given
     if(i == 0) {
         arguments[0] = malloc(MAX_PATH_LEN * sizeof(char*));
-        strcpy(arguments[0], "./");
+        strcpy(arguments[0], ".");
         i++;
     }
+
+    
 
     int number_of_args = i;
 
@@ -175,36 +217,41 @@ void run_discover(const struct ShellVariables *sv) {
         return;
     }
 
-    struct discover_info *data = malloc(sizeof(struct discover_info));
-    data->entities = malloc(MAX_DISCOVER_ENTITIES * sizeof(char*));
-    data->types    = malloc(MAX_DISCOVER_ENTITIES * sizeof(int));
+    // if no flag is given and no target file is given, then trigger both -d and -f
+    if(number_of_args == 1 && flag_bitmap[FLAG_BITMAP_DISCOVER_d] == 0 && flag_bitmap[FLAG_BITMAP_DISCOVER_f] == 0) {
+        flag_bitmap[FLAG_BITMAP_DISCOVER_d] = 1;
+        flag_bitmap[FLAG_BITMAP_DISCOVER_f] = 1;
+    }
 
-    data->size = 0;
-    char target_file_path[MAX_PATH_LEN] = "\0";
+    if(number_of_args == 2 && flag_bitmap[FLAG_BITMAP_DISCOVER_d] == 0 && flag_bitmap[FLAG_BITMAP_DISCOVER_f] == 0) {
+        
+        char target_file_path[MAX_PATH_LEN] = "\0";
+        scan_directory(arguments[0], arguments[1], target_file_path, NULL, NULL, 1);
+        printf("%s\n", target_file_path);
 
-    if(number_of_args == 1) {
-        scan_directory(arguments[0], data, NULL, NULL, flag_bitmap[FLAG_BITMAP_DISCOVER_d]);
     } else {
-        scan_directory(arguments[0], data, arguments[1], target_file_path, flag_bitmap[FLAG_BITMAP_DISCOVER_d]);
+        
+        struct discover_info *data = malloc(sizeof(struct discover_info));
+        data->entities = malloc(MAX_DISCOVER_ENTITIES * sizeof(char*));
+        data->size = 0;
+
+        data->entities[data->size] = ".";
+        data->size++;
+        data->entities[data->size] = "..";
+        data->size++;
+
+        scan_directory(arguments[0], NULL, NULL, data, flag_bitmap, 1);
+
+        // sort data
+
+        for(int i = 0; i < data->size; i++) {
+            printf("%s\n", data->entities[i]);
+        }
+
+        free(data->entities);
+        free(data);
     }
-
-    printf("FILEPATH: %s\n", target_file_path);
-
-    for(int i = 0; i < data->size; i++) {
-        printf("%s\n", data->entities[i]);
-    }
-
-    for(int i = 0; i < data->size; i++) {
-        free(data->entities[i]);
-    }
-
-    free(data->entities);
-    free(data->types);
-    free(data);
-
 
     chdir(previous_path);
     free(previous_path);
-
-
 }

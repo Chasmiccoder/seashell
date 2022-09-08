@@ -72,9 +72,13 @@ The user can type in any command, including, ./a.out, which starts a new process
 
 We can reduce redundancy/modularize more. E.g. init_ls_flag_bitmap and init_discover_flag_bitmap do the same thing.
 
-create a function that processes the paths before feeding them directly. This is to account for using ~/ as the shell directory
+create a function that processes the paths before feeding them directly. This is to account for using ~/ as the shell directory. resolve_path
 
 study links
+
+handle memory wastage in ls and discover
+
+discover ~ not working
 
 ### Potential future bugs
 Multiple commands with ; might get messed up because of same var names

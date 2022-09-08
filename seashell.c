@@ -33,11 +33,7 @@ errno.h   - errno
 
 void process_statement(struct ShellVariables *sv, const char *raw_statement) {
     add_command_to_history(sv, raw_statement);
-    
-    
-    // struct queue *Q = sv->command_buffer;
-    // printf("HIH: %s\n", );
-
+    update_history_db(sv);
 
     char *statement = malloc((sizeof(raw_statement) + 1) * sizeof(char));
     format_string(statement, raw_statement);
@@ -62,7 +58,6 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
         run_discover(sv);
     }
     else {
-        // shell_warning("command not found");
         run_system_command(command, sv);
     }
 
@@ -100,6 +95,7 @@ int main() {
 
     struct ShellVariables *sv = malloc(sizeof(struct ShellVariables));
     init_shell_variables(sv);
+    fetch_history_db(sv);
 
     while(sv->loop_control) {
         print_shell_prompt(sv);

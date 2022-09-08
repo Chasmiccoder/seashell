@@ -1,0 +1,6 @@
+echo hi
+echo hi 1
+ls -la
+aslkfnskl
+history
+exir

@@ -8,6 +8,23 @@
 #include "../datastructures.h"
 #include "../shell_manipulation.h"
 
+void update_history_db(struct ShellVariables *sv) {
+    struct queue **Q = sv->command_buffer;
+
+    remove("history_database.txt");
+    FILE *history_db = fopen("history_database.txt", "w");
+    struct string_node *current = (*sv->command_buffer)->front;
+    
+    while(current->next != NULL) {
+        char line[MAX_COMMAND_LEN];
+        sprintf(line, "%s\n", current->string);
+        fputs(line, history_db);
+        current = current->next;
+    }
+
+    fclose(history_db);
+}
+
 void add_command_to_history(struct ShellVariables *sv, const char *command) {
     /*
     We're maintaining a 'moving' queue with nodes
@@ -44,6 +61,23 @@ void add_command_to_history(struct ShellVariables *sv, const char *command) {
         free(element->string);
         free(element);
     }
+}
+
+void fetch_history_db(struct ShellVariables *sv) {
+
+    FILE *history_db = fopen("history_database.txt", "r");
+
+    if(history_db == NULL) {
+        return;
+    }
+
+    char line[MAX_COMMAND_LEN];
+
+    while(fscanf(history_db, "%[^\n]%*c", line)!= EOF) {
+        add_command_to_history(sv, line);
+    }
+    
+    fclose(history_db);
 }
 
 void run_history(const struct ShellVariables *sv) {

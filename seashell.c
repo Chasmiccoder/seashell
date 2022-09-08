@@ -56,8 +56,9 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
         run_history(sv);
     } else if(strcmp(command, "discover") == 0) {
         run_discover(sv);
-    }
-    else {
+    } else if(strcmp(command, "pinfo") == 0) {
+        run_pinfo();
+    } else {
         run_system_command(command, sv);
     }
 

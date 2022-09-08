@@ -8,6 +8,25 @@
 #include "../shell_manipulation.h"
 #include "commands.h"
 
+void get_resolved_path_cd(char *target_string, char *path, struct ShellVariables *sv, char *with_respect_to) {
+    /*
+    We can resolve the absolute path with respect to the current working
+    directory ".", or the home directory (shell location) "~"
+    */
+
+    if(is_substring(sv->home_path, path)) {
+        strcpy(target_string, with_respect_to);
+        strcat(target_string, path+strlen(sv->home_path));
+    }
+
+    if(is_substring(with_respect_to, path)) {
+        strcpy(target_string, sv->home_path);
+        strcat(target_string, with_respect_to);
+        strcat(target_string, path + strlen(with_respect_to));
+        printf("CHECK THIS ONCE 2: %s\n", target_string);
+    }
+}
+
 void run_cd(struct ShellVariables *sv) {
     /*
     Usual filestructure:
@@ -31,7 +50,7 @@ void run_cd(struct ShellVariables *sv) {
 
     // TODO: handle case in which more than 1 arg is passed
     char *arg = strtok(NULL, "");
-    if(arg == NULL || strcmp(arg, "~") == 0 || strcmp(arg, ".") == 0) {
+    if(arg == NULL || strcmp(arg, "~") == 0 || strcmp(arg, ".") == 0 || strcmp(arg, "~/") == 0) {
 
         if(strcmp(sv->cwd_path, sv->home_path) == 0) {
             return;

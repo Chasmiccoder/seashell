@@ -1,6 +1,19 @@
-echo hi
-echo hi 1
-ls -la
-aslkfnskl
-history
-exir
+cd ~
+cd ~/
+clear
+cd ..
+cd -
+cd ~
+cd -
+clear
+ls
+cd dir
+ls
+cd ..
+l
+cd ~/dir
+cd ~/
+cd ..
+cd ~/
+gedit &
+pinfo

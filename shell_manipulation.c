@@ -69,6 +69,7 @@ void shell_warning(const char *message) {
     strcat(buffer, message);
     strcat(buffer, "\n\n");
     printf("%s", buffer);
+    // perror(buffer);
     free(buffer);
 }
 

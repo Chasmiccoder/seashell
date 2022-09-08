@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+// #include "globals.h"
 #include "shell_manipulation.h"
 
 #define COLOR_WHITE 0
@@ -19,7 +20,7 @@ void clear_string(char *str) {
     memset(str, '\0', strlen(str) * sizeof(char));
 }
 
-int is_substring(char *substring, char *string) {
+int is_substring(const char *substring, const char *string) {
     if(strlen(substring) > strlen(string)) {
         return 0;
     }

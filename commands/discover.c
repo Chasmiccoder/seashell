@@ -47,7 +47,26 @@ int check_if_outlier(const char *filename) {
     return 0;
 }
 
-void scan_directory(char *targetdir, const char *targetfile, char *target_file_path, struct discover_info *data, const int *flag_bitmap, const int is_recursive){
+void get_resolved_path(char *target_string, char *path, struct ShellVariables *sv, char *with_respect_to) {
+    /*
+    We can resolve the absolute path with respect to the current working
+    directory ".", or the home directory (shell location) "~"
+    */
+
+    if(is_substring(sv->home_path, path)) {
+        strcpy(target_string, with_respect_to);
+        strcat(target_string, path+strlen(sv->home_path));
+    }
+
+    if(is_substring(with_respect_to, path)) {
+        strcpy(target_string, sv->home_path);
+        strcat(target_string, with_respect_to);
+        strcat(target_string, path + strlen(with_respect_to));
+        printf("CHECK THIS ONCE 2: %s\n", target_string);
+    }
+}
+
+void scan_directory(char *targetdir, const char *targetfile, char *target_file_path, struct discover_info *data, const int *flag_bitmap, const int is_recursive, struct ShellVariables *sv){
     /*
     If is_recursive is true, then scan the directory recursively
     targetdir = directory to search under
@@ -76,16 +95,17 @@ void scan_directory(char *targetdir, const char *targetfile, char *target_file_p
             if(strcmp(targetfile, file->d_name) == 0) {
                 char tmp[MAX_PATH_LEN];
                 getcwd(tmp, MAX_PATH_LEN);
-                strcpy(target_file_path, tmp);
-                strcat(target_file_path, "/");
-                strcat(target_file_path, targetfile);
+
+                strcat(tmp, "/");
+                strcat(tmp, targetfile);
+                get_resolved_path(target_file_path, tmp, sv, ".");
             }
 
             if(is_recursive && file->d_type == DT_DIR && !check_if_outlier(file->d_name)) {
                 char path[MAX_PATH_LEN];
                 strcpy(path, file->d_name);
 
-                scan_directory(path, targetfile, target_file_path, data, flag_bitmap, is_recursive);
+                scan_directory(path, targetfile, target_file_path, data, flag_bitmap, is_recursive, sv);
                 
                 // after the recursive call, go back 1 directory
                 int status = chdir("../");
@@ -105,24 +125,30 @@ void scan_directory(char *targetdir, const char *targetfile, char *target_file_p
                 // add directory to data
 
                 char tmp[MAX_PATH_LEN];
+                char file_path[MAX_PATH_LEN];
                 getcwd(tmp, MAX_PATH_LEN);
                 strcat(tmp, "/");
                 strcat(tmp, file->d_name);
 
+                get_resolved_path(file_path, tmp, sv, ".");
+
                 data->entities[data->size] = malloc(MAX_PATH_LEN * sizeof(char));
-                strcpy(data->entities[data->size], tmp);
+                strcpy(data->entities[data->size], file_path);
                 data->size++;
             
             } else if(file->d_type != DT_DIR && flag_bitmap[FLAG_BITMAP_DISCOVER_f]) {
                 // add file to data
 
                 char tmp[MAX_PATH_LEN];
+                char file_path[MAX_PATH_LEN];
                 getcwd(tmp, MAX_PATH_LEN);
                 strcat(tmp, "/");
                 strcat(tmp, file->d_name);
 
+                get_resolved_path(file_path, tmp, sv, ".");
+
                 data->entities[data->size] = malloc(MAX_PATH_LEN * sizeof(char));
-                strcpy(data->entities[data->size], tmp);
+                strcpy(data->entities[data->size], file_path);
                 data->size++;
 
             }
@@ -131,7 +157,7 @@ void scan_directory(char *targetdir, const char *targetfile, char *target_file_p
                 char path[MAX_PATH_LEN];
                 strcpy(path, file->d_name);
 
-                scan_directory(path, targetfile, target_file_path, data, flag_bitmap, is_recursive);
+                scan_directory(path, targetfile, target_file_path, data, flag_bitmap, is_recursive, sv);
                 
                 // after the recursive call, go back 1 directory
                 int status = chdir("../");
@@ -147,7 +173,7 @@ void scan_directory(char *targetdir, const char *targetfile, char *target_file_p
     closedir(directory);
 }
 
-void run_discover(const struct ShellVariables *sv) {
+void run_discover(struct ShellVariables *sv) {
     /*
     Usage:
     discover <target_dir> <type_flags> <file_name>
@@ -226,21 +252,27 @@ void run_discover(const struct ShellVariables *sv) {
     if(number_of_args == 2 && flag_bitmap[FLAG_BITMAP_DISCOVER_d] == 0 && flag_bitmap[FLAG_BITMAP_DISCOVER_f] == 0) {
         
         char target_file_path[MAX_PATH_LEN] = "\0";
-        scan_directory(arguments[0], arguments[1], target_file_path, NULL, NULL, 1);
-        printf("%s\n", target_file_path);
+        scan_directory(arguments[0], arguments[1], target_file_path, NULL, NULL, 1, sv);
 
+        if(strlen(target_file_path) > 0) {
+            printf("%s\n", target_file_path);
+        } else {
+            printf("File not found!\n");
+        }
     } else {
         
         struct discover_info *data = malloc(sizeof(struct discover_info));
         data->entities = malloc(MAX_DISCOVER_ENTITIES * sizeof(char*));
         data->size = 0;
 
-        data->entities[data->size] = ".";
-        data->size++;
-        data->entities[data->size] = "..";
-        data->size++;
+        if(flag_bitmap[FLAG_BITMAP_DISCOVER_f] == 0) {
+            data->entities[data->size] = ".";
+            data->size++;
+            data->entities[data->size] = "..";
+            data->size++;
+        }
 
-        scan_directory(arguments[0], NULL, NULL, data, flag_bitmap, 1);
+        scan_directory(arguments[0], NULL, NULL, data, flag_bitmap, 1, sv);
 
         // sort data
 

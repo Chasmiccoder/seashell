@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <signal.h>
 #include <time.h>
 
@@ -10,10 +11,26 @@
 #include "../shell_manipulation.h"
 
 #define MAX_NUMBER_OF_ARGS 100
+#define MAX_NUMBER_OF_BACKGROUND_PROCESSES 15
 
-// int global_number_of_processes = 1;
+int global_number_of_processes = 0;
+char *global_background_pids[MAX_NUMBER_OF_BACKGROUND_PROCESSES];
 
-// TODO: Can be done without using shellvariables
+void signal_handler(int sig) {
+    pid_t pid;
+    int status;
+    while((pid = waitpid(-1, &status, WNOHANG)) > 0) ;
+    
+    printf("\n[%d] exited ", global_number_of_processes);
+
+    if(status == 0) {
+        printf("normally\n\n");
+    } else {
+        printf("abnormally\n\n");
+    }
+    global_number_of_processes--;
+}
+
 void run_system_command(char *command_, struct ShellVariables *sv) {
 
     char **arguments = malloc(MAX_NUMBER_OF_ARGS * sizeof(char*));
@@ -41,11 +58,6 @@ void run_system_command(char *command_, struct ShellVariables *sv) {
         i++;
     }
 
-    
-    // if(i != 0 && strcmp(arguments[i-1], "&") == 0) {
-    //     is_background_process = 1;
-    // }
-
     arguments[i] = malloc(MAX_PATH_LEN * sizeof(char));
     arguments[i] = NULL;
 
@@ -53,52 +65,39 @@ void run_system_command(char *command_, struct ShellVariables *sv) {
 
     time_t start_seconds = time(NULL);
 
-    // if(global_number_of_processes > 5) {
-    //     return;
-    // }
-
     if(is_background_process) {
-        // global_number_of_processes++;
-        // printf("GLOB 0: %d\n", global_number_of_processes);
+        global_number_of_processes++;
         int pid = fork();
+        int fork_status = -1;
         if(pid == 0) {
-            int pid2 = fork();
-            if(pid2 == 0) {
-                int status = execvp(command_, arguments);
-                if(status == -1) {
-                    shell_warning("command not found");
-                }
-                exit(0);
-                // kill(getpid(), SIGINT);
-            } else {
-                wait(NULL);
-
-                // printf("\nDone!\n");
-                printf("\n%s with pid [%d] exited normally\n", command_, getpid());
-
-                print_shell_prompt(sv);
-                // return;
-                exit(0);
-                // kill(getpid(),SIGINT);
-                // printf("killed 1\n");
+            
+            // global_number_of_processes++;
+            printf("\nBackground Process [%d]: %s (%d) initiated\n", global_number_of_processes, command_, getpid());
+            int status = execvp(command_, arguments);
+            if(status == -1) {
+                shell_warning("command not found");
             }
-        }
+            exit(0);
 
+        } else {
+
+            struct sigaction sa;
+            sigemptyset(&sa.sa_mask);
+            sa.sa_flags = SA_RESTART;
+            sa.sa_handler = signal_handler;
+
+            sigaction(SIGCHLD, &sa, NULL);
+        }
     }
     
     // if the process is a foreground process
     else {
-        // global_number_of_processes++;
-        // printf("GLOB 1: %d\n", global_number_of_processes);
         int pid = fork();
         if(pid == 0) {
             int status = execvp(command_, arguments);
             if(status == -1) {
                 shell_warning("command not found");
             }
-
-            // kill(getpid(),SIGINT);
-            // exit(0);
 
         } else {
             // if it is a foreground process, wait for the child process to terminate
@@ -110,9 +109,6 @@ void run_system_command(char *command_, struct ShellVariables *sv) {
             if(execution_time >= 1) {
                 printf("Took %d seconds\n", execution_time);
             }
-
-            // kill(getpid(),SIGINT);
-            // kill(pid, SIGTERM);
         }
     }
 

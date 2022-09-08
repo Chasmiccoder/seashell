@@ -78,7 +78,13 @@ study links
 
 handle memory wastage in ls and discover
 
-discover ~ not working
+discover '~' not working
+
+ifndef in all header files
+
+Add colours to discover outpu
+
+check if & is present elsewhere like, sleep 2&
 
 ### Potential future bugs
 Multiple commands with ; might get messed up because of same var names

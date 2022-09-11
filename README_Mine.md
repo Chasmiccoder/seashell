@@ -88,5 +88,10 @@ check if & is present elsewhere like, sleep 2&
 
 ls after cd not working :(
 
+
+
+
+raw mode for tab autocomplete
+
 ### Potential future bugs
 Multiple commands with ; might get messed up because of same var names

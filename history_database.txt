@@ -1,19 +1,15 @@
-cd ~
-cd ~/
-clear
-cd ..
-cd -
-cd ~
-cd -
-clear
-ls
+echo hi
+echo in root
+echo err, in home
+history
 cd dir
-ls
+history
 cd ..
-l
-cd ~/dir
-cd ~/
-cd ..
-cd ~/
-gedit &
-pinfo
+history
+bruh
+echo hi
+echo in home
+cd dir
+echo in dir
+echo wooooooooooo
+history

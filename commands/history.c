@@ -11,8 +11,15 @@
 void update_history_db(struct ShellVariables *sv) {
     struct queue **Q = sv->command_buffer;
 
-    remove("history_database.txt");
-    FILE *history_db = fopen("history_database.txt", "w");
+    char history_db_path[MAX_PATH_LEN];
+    strcpy(history_db_path, sv->home_path);
+    strcat(history_db_path, "/");
+    strcat(history_db_path, "history_database.txt");
+
+    remove(history_db_path);
+
+
+    FILE *history_db = fopen(history_db_path, "w");
     struct string_node *current = (*sv->command_buffer)->front;
     
     while(current->next != NULL) {
@@ -65,7 +72,12 @@ void add_command_to_history(struct ShellVariables *sv, const char *command) {
 
 void fetch_history_db(struct ShellVariables *sv) {
 
-    FILE *history_db = fopen("history_database.txt", "r");
+    char history_db_path[MAX_PATH_LEN];
+    strcpy(history_db_path, sv->home_path);
+    strcat(history_db_path, "/");
+    strcat(history_db_path, "history_database.txt");
+
+    FILE *history_db = fopen(history_db_path, "r");
 
     if(history_db == NULL) {
         return;

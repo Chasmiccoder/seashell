@@ -10,7 +10,6 @@
 #include "../globals.h"
 #include "../shell_manipulation.h"
 
-#define MAX_NUMBER_OF_ARGS 100
 #define MAX_NUMBER_OF_BACKGROUND_PROCESSES 15
 
 int global_number_of_processes = 0;

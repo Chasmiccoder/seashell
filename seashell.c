@@ -35,15 +35,17 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
     add_command_to_history(sv, raw_statement);
     update_history_db(sv);
 
-    char *statement = malloc((sizeof(raw_statement) + 1) * sizeof(char));
-    format_string(statement, raw_statement);
-    
-    char *command = strtok(statement, " ");
+    // char *statement = malloc((sizeof(raw_statement) + 1) * sizeof(char));
+    char statement[MAX_COMMAND_LEN];
+    trim_string(statement, raw_statement);
 
-    if(strcmp(command, "exit") == 0) {
-        run_exit();
-    } else if(strcmp(command, "echo") == 0) {
-        run_echo();
+    // format_string(statement, raw_statement);
+
+    char *command = strtok(statement, " ");
+    char *args = strtok(NULL, "");
+    
+    if(strcmp(command, "echo") == 0) {
+        run_echo(args);
     } else if(strcmp(command, "cd") == 0) {
         run_cd(sv);
     } else if(strcmp(command, "pwd") == 0) {
@@ -62,7 +64,7 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
         run_system_command(command, sv);
     }
 
-    free(statement);
+    // free(statement);
 }
 
 void process_input(struct ShellVariables *sv, char *input_string) {
@@ -101,7 +103,8 @@ int main() {
     while(sv->loop_control) {
         print_shell_prompt(sv);
 
-        char *input_string = malloc(MAX_COMMAND_LEN * sizeof(char));
+        // char *input_string = malloc(MAX_COMMAND_LEN * sizeof(char));
+        char input_string[MAX_COMMAND_LEN];
         scanf("%[^\n]%*c", input_string);
 
         process_input(sv, input_string);

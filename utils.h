@@ -7,6 +7,9 @@
 
 void clear_string(char *str);
 int is_substring(char *substring, char *string);
+
+void trim_string(char *dest, const char *source);
+
 void format_string(char *dest, const char *source);
 void add_color_to_string(char *string, int color_code);
 void string_to_lower(char *string);

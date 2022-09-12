@@ -34,6 +34,31 @@ int is_substring(const char *substring, const char *string) {
     return 1;
 }
 
+void trim_string(char *dest, const char *source) {
+    int i = 0; // source index
+    int j = 0; // dest index
+
+    int len_source = strlen(source);
+    while(i < len_source && source[i] == ' ') {
+        i++;
+    }
+
+    int last_char = len_source - 1;
+
+    for(int k = len_source - 1; k >= 0; k--) {
+        if(source[k] != ' ' && source[k] != '\n') {  // [5]
+            last_char = k;
+            break;
+        }
+    }
+
+    while(i <= last_char) {
+        dest[j++] = source[i++];
+    }
+
+    dest[j] = '\0';
+}
+
 void format_string(char *dest, const char *source) {
     /*
     Removes unnecessary spaces in a string.

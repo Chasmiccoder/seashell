@@ -95,3 +95,14 @@ raw mode for tab autocomplete
 
 ### Potential future bugs
 Multiple commands with ; might get messed up because of same var names
+
+
+
+
+
+
+
+
+## Part 2 todo list
+
+First tokenize everything before and send it as run_x argument

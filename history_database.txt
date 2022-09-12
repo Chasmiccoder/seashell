@@ -1,15 +1,19 @@
 echo hi
-echo in root
-echo err, in home
-history
-cd dir
-history
-cd ..
-history
-bruh
+echo hello world
+echo hello    world
+echo "hello   world"
 echo hi
-echo in home
-cd dir
-echo in dir
-echo wooooooooooo
-history
+echo hello world
+echo hello    world
+echo hello world
+echo hello   world
+echo "hello    world"
+echo hello world
+echo
+echo hi
+echo h
+echo hi world
+echo hello    world
+echo hello world
+echo hello "   world "
+echo hello t"    world"

@@ -5,6 +5,7 @@
 #define MAX_COMMAND_LEN 2048
 #define MAX_COMMANDS_IN_ONE_LINE 50  // for when multiple commands are used with ';'
 #define MAX_COMMANDS_IN_HISTORY 20
+#define MAX_NUMBER_OF_ARGS 100
 
 
 

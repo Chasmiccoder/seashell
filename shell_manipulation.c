@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "globals.h"
+// #include "globals.h"
 #include "utils.h"
 #include "datastructures.h"
 #include "shell_manipulation.h"

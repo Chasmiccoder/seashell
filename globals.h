@@ -7,5 +7,6 @@
 #define MAX_COMMANDS_IN_HISTORY 20
 #define MAX_NUMBER_OF_ARGS 100
 
-
-
+#define COLOR_WHITE 0
+#define COLOR_BLUE  1
+#define COLOR_GREEN 2

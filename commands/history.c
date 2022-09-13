@@ -6,7 +6,7 @@
 #include "../globals.h"
 #include "../utils.h"
 #include "../datastructures.h"
-#include "../shell_manipulation.h"
+// #include "../shell_manipulation.h"
 
 void update_history_db(struct ShellVariables *sv) {
     struct queue **Q = sv->command_buffer;

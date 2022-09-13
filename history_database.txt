@@ -1,19 +1,19 @@
-cd Temp
-cd ~
-cd -
-cd ..
-cd ~
-cd -
+ls .
+ls . ./dir
+ls . ~/dir
 clear
-pwd
-cd dir
-pwd
-cd /
-pwd
-cd -
-cd ..
-cd ../../../
+exit
+clear
+git
+clea
 ls
-pwd
+ls -la
 clear
-git status
+exit
+ls -a
+ls . ../ ~/dor
+ls . ../ ~/dir
+ls . ../ -l ~/dir -a
+clear
+exit 1234
+[A

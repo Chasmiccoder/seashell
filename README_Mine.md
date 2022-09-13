@@ -112,6 +112,7 @@ And then
 cd -
 takes you to home instead of prev dir
 
+implement clear, exit via system_commands
 
 ## Part 2 todo list
 

@@ -256,8 +256,6 @@ void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct Sh
             strcpy(data->names[i], file->d_name);
             strcpy(data->colored_names[i], file->d_name);
 
-
-
             if(data->permissions[i][0] == 'd') {
                 add_color_to_string(data->colored_names[i], COLOR_BLUE);
             } else if(data->permissions[i][3] == 'x' || data->permissions[i][6] == 'x' || data->permissions[i][9] == 'x') {
@@ -293,7 +291,7 @@ void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct Sh
 }
 
 
-void run_ls(const struct ShellVariables *sv) {
+void run_ls(const char *args, const struct ShellVariables *sv) {
     /*
     list (ls) arguments -
     None - Display the names of all files (ascending lexicographical order)
@@ -341,24 +339,22 @@ void run_ls(const struct ShellVariables *sv) {
     This method is more memory intensive, but makes addition of more flags and features easy.
     */
 
-
-    char *arg = strtok(NULL, " ");
-
     char **arguments = malloc(MAX_LS_ARGS * sizeof(char*));
     int i = 0;
 
     int *flag_bitmap = malloc(NUM_LS_FLAGS_SUPPORTED * sizeof(int));
     init_ls_flag_bitmap(flag_bitmap);
 
-
     // if no argument is given, add '.' as an argument
-    if(arg == NULL) {
-
+    if(args == NULL) {
         arguments[i] = malloc(MAX_PATH_LEN * sizeof(char*));
         strcpy(arguments[i], ".");
         i++;
 
     } else {
+        char args_modifiable[MAX_COMMAND_LEN];
+        strcpy(args_modifiable, args);
+        char *arg = strtok(args_modifiable, " ");
         while(arg != NULL) {
             
             if(strcmp(arg, "-l") == 0) {
@@ -399,7 +395,11 @@ void run_ls(const struct ShellVariables *sv) {
     int number_of_args = i;
     
     for(int i = 0; i < number_of_args; i++) {
-        ls_on_one_directory(arguments[i], flag_bitmap, sv);
+        // void convert_shell_path_to_absolute_path(char *target, const char *path, struct ShellVariables *sv) {
+        char path[MAX_PATH_LEN];
+        // strcpy(path, arguments[i]);
+        convert_shell_path_to_absolute_path(path, arguments[i], sv);
+        ls_on_one_directory(path, flag_bitmap, sv);
     }
     
     free(flag_bitmap);

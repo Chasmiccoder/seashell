@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "globals.h": "c"
+        "globals.h": "c",
+        "shell_manipulation.h": "c"
     }
 }

@@ -5,7 +5,7 @@
 
 #include "../globals.h"
 #include "../utils.h"
-#include "../shell_manipulation.h"
+// #include "../shell_manipulation.h"
 #include "commands.h"
 
 void get_resolved_path_cd(char *target_string, char *path, struct ShellVariables *sv, char *with_respect_to) {
@@ -28,18 +28,6 @@ void get_resolved_path_cd(char *target_string, char *path, struct ShellVariables
         return;
     }
 }
-
-void convert_shell_path_to_absolute_path(char *target, const char *path, struct ShellVariables *sv) {
-    if(is_substring("~", path)) {
-        strcpy(target, sv->home_path);
-        if(strlen(path) > 1) {
-            strcat(target, path + strlen("~"));
-        }
-    } else {
-        strcpy(target, path);
-    }
-}
-
 
 void run_cd(const char *args, struct ShellVariables *sv) {
     /*

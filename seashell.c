@@ -11,7 +11,7 @@ Not implemented perror and errno yet
 
 #include "globals.h"
 #include "utils.h"
-#include "shell_manipulation.h"
+// #include "shell_manipulation.h"
 #include "commands/commands.h"
 
 /*
@@ -44,16 +44,16 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
     char *command = strtok(statement, " ");
     char *args = strtok(NULL, "");
     
-    if(strcmp(command, "echo") == 0) {
+    if(strcmp(command, "exit") == 0) {
+        run_exit(args);
+    } else if(strcmp(command, "echo") == 0) {
         run_echo(args);
     } else if(strcmp(command, "cd") == 0) {
         run_cd(args, sv);
     } else if(strcmp(command, "pwd") == 0) {
         run_pwd(args, sv);
-    } else if(strcmp(command, "clear") == 0) {
-        run_clear();
     } else if(strcmp(command, "ls") == 0) {
-        run_ls(sv);
+        run_ls(args, sv);
     } else if(strcmp(command, "history") == 0) {
         run_history(sv);
     } else if(strcmp(command, "discover") == 0) {
@@ -63,8 +63,6 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
     } else {
         run_system_command(command, sv);
     }
-
-    // free(statement);
 }
 
 void process_input(struct ShellVariables *sv, char *input_string) {

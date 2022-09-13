@@ -1,4 +1,7 @@
+#ifndef shell_manipulation_h
+#define shell_manipulation_h
 
+#include "globals.h"
 
 struct ShellVariables {
     char *username;
@@ -12,9 +15,8 @@ struct ShellVariables {
     struct queue **command_buffer;
 };
 
-
-
 void init_shell_variables(struct ShellVariables *sv);
 void print_shell_prompt(const struct ShellVariables *sv);
 void shell_warning(const char *message);
 
+#endif

@@ -3,11 +3,8 @@
 #include <stdio.h>
 
 // #include "globals.h"
-#include "shell_manipulation.h"
-
-#define COLOR_WHITE 0
-#define COLOR_BLUE  1
-#define COLOR_GREEN 2
+// #include "shell_manipulation.h"
+#include "utils.h"
 
 long long max(long long num1, long long num2) {
     if(num1 > num2) {
@@ -188,4 +185,16 @@ void prepend_string(const char *prefix, char *string) {
     strcpy(string, tmp);
     printf("str str: %s\n", string);
     free(tmp);
+}
+
+
+void convert_shell_path_to_absolute_path(char *target, const char *path, const struct ShellVariables *sv) {
+    if(is_substring("~", path)) {
+        strcpy(target, sv->home_path);
+        if(strlen(path) > 1) {
+            strcat(target, path + strlen("~"));
+        }
+    } else {
+        strcpy(target, path);
+    }
 }

@@ -6,7 +6,7 @@
 
 #include "../globals.h"
 #include "../utils.h"
-#include "../shell_manipulation.h"
+// #include "../shell_manipulation.h"
 
 #define MAX_DISCOVER_ARGS 25            // incase flags are repeated
 #define NUM_DISCOVER_FLAGS_SUPPORTED 2  // -d, -f

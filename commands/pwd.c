@@ -4,10 +4,8 @@
 #include "../globals.h"
 #include "../shell_manipulation.h"
 
-void run_pwd(const struct ShellVariables *sv) {
-
-    char *arg = strtok(NULL, "");
-    if(arg != NULL) {
+void run_pwd(const char *args, const struct ShellVariables *sv) {
+    if(args != NULL) {
         shell_warning("'pwd' takes no arguments");
         return;
     }

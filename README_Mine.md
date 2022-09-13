@@ -101,6 +101,16 @@ Multiple commands with ; might get messed up because of same var names
 
 
 
+home is stored as:
+/home/aryaman/Desktop/IIIT Hyderabad/Sem 3/3 - Operating Systems and Networks/Assignment 2/seashell
+
+
+cd .
+cd ~
+cd
+And then
+cd -
+takes you to home instead of prev dir
 
 
 ## Part 2 todo list

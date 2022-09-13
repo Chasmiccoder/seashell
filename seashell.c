@@ -47,9 +47,9 @@ void process_statement(struct ShellVariables *sv, const char *raw_statement) {
     if(strcmp(command, "echo") == 0) {
         run_echo(args);
     } else if(strcmp(command, "cd") == 0) {
-        run_cd(sv);
+        run_cd(args, sv);
     } else if(strcmp(command, "pwd") == 0) {
-        run_pwd(sv);
+        run_pwd(args, sv);
     } else if(strcmp(command, "clear") == 0) {
         run_clear();
     } else if(strcmp(command, "ls") == 0) {
@@ -102,8 +102,6 @@ int main() {
 
     while(sv->loop_control) {
         print_shell_prompt(sv);
-
-        // char *input_string = malloc(MAX_COMMAND_LEN * sizeof(char));
         char input_string[MAX_COMMAND_LEN];
         scanf("%[^\n]%*c", input_string);
 

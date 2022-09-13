@@ -6,7 +6,7 @@
 #define COLOR_GREEN 2
 
 void clear_string(char *str);
-int is_substring(char *substring, char *string);
+int is_substring(const char *substring, const char *string);
 
 void trim_string(char *dest, const char *source);
 

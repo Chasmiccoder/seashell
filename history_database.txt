@@ -1,19 +1,19 @@
-echo hi
-echo hello world
-echo hello    world
-echo "hello   world"
-echo hi
-echo hello world
-echo hello    world
-echo hello world
-echo hello   world
-echo "hello    world"
-echo hello world
-echo
-echo hi
-echo h
-echo hi world
-echo hello    world
-echo hello world
-echo hello "   world "
-echo hello t"    world"
+cd Temp
+cd ~
+cd -
+cd ..
+cd ~
+cd -
+clear
+pwd
+cd dir
+pwd
+cd /
+pwd
+cd -
+cd ..
+cd ../../../
+ls
+pwd
+clear
+git status

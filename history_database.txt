@@ -1,19 +1,19 @@
-ls .
-ls . ./dir
-ls . ~/dir
+jobs
+jobs -r
+jobs -s
 clear
-exit
+sig 3 4
+sig 4 5
+sig
+sig 4 5 6
+sig 124124 124 214 
+sig abcde
+echo NICE!
+sleep 50 &
+echo hi
+jobs
+sig 0 9
+echo hi
+jobs
+echo awesomeee!!
 clear
-git
-clea
-ls
-ls -la
-clear
-exit
-ls -a
-ls . ../ ~/dor
-ls . ../ ~/dir
-ls . ../ -l ~/dir -a
-clear
-exit 1234
-[A

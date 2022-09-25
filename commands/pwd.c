@@ -2,9 +2,10 @@
 #include <string.h>
 
 #include "../globals.h"
-#include "../shell_manipulation.h"
 
-void run_pwd(const char *args, const struct ShellVariables *sv) {
+
+void run_pwd(const char *args) {
+
     if(args != NULL) {
         shell_warning("'pwd' takes no arguments");
         return;

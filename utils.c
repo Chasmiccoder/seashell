@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// #include "globals.h"
-// #include "shell_manipulation.h"
-#include "utils.h"
+#include "globals.h"
 
 long long max(long long num1, long long num2) {
     if(num1 > num2) {
@@ -188,7 +186,9 @@ void prepend_string(const char *prefix, char *string) {
 }
 
 
-void convert_shell_path_to_absolute_path(char *target, const char *path, const struct ShellVariables *sv) {
+// void convert_shell_path_to_absolute_path(char *target, const char *path, const struct ShellVariables *sv) {
+void convert_shell_path_to_absolute_path(char *target, const char *path) {
+
     if(is_substring("~", path)) {
         strcpy(target, sv->home_path);
         if(strlen(path) > 1) {
@@ -196,5 +196,13 @@ void convert_shell_path_to_absolute_path(char *target, const char *path, const s
         }
     } else {
         strcpy(target, path);
+    }
+}
+
+void print_bg_process_details() {
+    printf("Background Process Table\n");
+    for(int i = 0; i < MAX_NUM_OF_BACKGROUND_PROCESSES; i++) {
+        if(sv->background_process_ids[i] != -1)
+            printf("[%d] pid: %d name: %s status: %s\n", i, sv->background_process_ids[i], sv->background_process_names[i], sv->background_process_status[i]);
     }
 }

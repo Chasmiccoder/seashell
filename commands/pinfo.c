@@ -4,7 +4,6 @@
 #include <unistd.h>
 
 #include "../globals.h"
-#include "../utils.h"
 
 void run_pinfo() {
 

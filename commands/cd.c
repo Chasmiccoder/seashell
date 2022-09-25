@@ -4,11 +4,9 @@
 #include <stdlib.h>
 
 #include "../globals.h"
-#include "../utils.h"
-// #include "../shell_manipulation.h"
 #include "commands.h"
 
-void get_resolved_path_cd(char *target_string, char *path, struct ShellVariables *sv, char *with_respect_to) {
+void get_resolved_path_cd(char *target_string, char *path, char *with_respect_to) {
     /*
     We can resolve the absolute path with respect to the current working
     directory ".", or the home directory (shell location) "~"
@@ -29,7 +27,7 @@ void get_resolved_path_cd(char *target_string, char *path, struct ShellVariables
     }
 }
 
-void run_cd(const char *args, struct ShellVariables *sv) {
+void run_cd(const char *args) {
     /*
     Usual filestructure:
     ~/ stands for home directory (for the specific user)
@@ -71,7 +69,7 @@ void run_cd(const char *args, struct ShellVariables *sv) {
     } else {
         char resolved_path[MAX_PATH_LEN];
         if(args != NULL) {
-            convert_shell_path_to_absolute_path(resolved_path, args, sv);
+            convert_shell_path_to_absolute_path(resolved_path, args);
         } else {
             strcpy(resolved_path, sv->home_path);
         }

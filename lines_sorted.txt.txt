@@ -1,0 +1,168 @@
+
+🐚 Exiting [34mseashell[m :)
+
+
+    
+            }
+        }
+        }
+        }
+        }
+        }
+        }
+        }
+        }
+    */
+    /*
+    }
+    }
+    }
+    }
+    }
+    }
+    }
+    }
+    }
+    }
+    }
+    }
+    }
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+    // [1]
+    [1] Trims spaces from the left to the first character
+    // [2]
+    [2] Trims spaces from the last character onwards
+    // [3]
+    [3] Trims extra spaces in between words/arguments
+    [4] If double quotes are used, it doesn't trim the spaces in between
+    [5] Also removes the newline char at the end (if present)
+    [6] Removes tabs '\t' if present (not inside double quotes)
+            break;
+            break;
+    char *buffer = malloc(len * sizeof(char));
+    char *buffer = malloc((strlen(string)+15) * sizeof(char));
+    char *tmp = malloc((strlen(string) + strlen(prefix) + 1) * sizeof(char));
+    clear_string(dest);
+    clear_string(str1);
+    clear_string(str2);
+        clear_string(string);
+        clear_string(string);
+        clear_string(string);
+    clear_string(string);
+    dest[i] = '\0';
+    dest[j] = '\0';
+                dest[j++] = source[i++];
+            dest[j++] = source[i++];
+        dest[j++] = source[i++];
+            doubleQuoteFlag = (doubleQuoteFlag == 1) ? 0 : 1; // toggle the flag
+    E.g.
+            } else {
+        } else {
+    } else {
+    } else if(color_code == COLOR_BLUE) {
+    } else if(color_code == COLOR_GREEN) {
+    for(int i = 0; i < strlen(string); i++) {
+    for(int i = 0; i < strlen(substring); i++) {
+    for(int k = len_source - 1; k >= 0; k--) {
+    for(int k = strlen(source) - 1; k >= 0; k--) {
+    free(buffer);
+    free(buffer);
+    free(tmp);
+    `  hello " word   !"` -> `hello " word   !"`
+    ` hello  world   `    -> `hello world`
+                i++;
+        i++;
+        i++;
+    if(color_code == COLOR_WHITE) {
+    if(is_substring("~", path)) {
+    if(num1 > num2) {
+        if(source[i] == '"') {  // [4]
+        if(source[i] != ' ' && source[i] != '\t') {
+            if(source[i] != '\t' && (oneSpace == 0 || doubleQuoteFlag)) { // [6]
+        if(source[k] != ' ' && source[k] != '\n') {  // [5]
+        if(source[k] != ' ' && source[k] != '\n' && source[k] != '\t') {  // [5]
+        if(status != 0) {
+    if(strcmp(system_call, "chdir") == 0) {
+        if(string[i] >= 'A' && string[i] <= 'Z') {
+        if(string[i] != substring[i]) {
+        if(strlen(path) > 1) {
+    if(strlen(substring) > strlen(string)) {
+#include "globals.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+    int doubleQuoteFlag = 0; // flag for the double quote immunity
+int handle_system_call(int status, char *system_call) {
+    int i = 0; // source index
+    int i = 0; // source index
+int is_substring(const char *substring, const char *string) {
+    int j = 0; // dest index
+    int j = 0; // dest index
+    int last_char = len_source - 1;
+    int last_char = strlen(source)-1;
+    int len = max(strlen(str1) + 1, strlen(str2) + 1);
+    int len_source = strlen(source);
+    int oneSpace = 0;        // gets incremented if 1 space/tab is encountered
+    int tmp = *num1;
+            last_char = k;
+            last_char = k;
+long long max(long long num1, long long num2) {
+    memset(str, '\0', strlen(str) * sizeof(char));
+    *num1 = *num2;
+    *num2 = tmp;
+                oneSpace++;
+            oneSpace = 0;
+            oneSpace = 0;
+    printf("pre, str: %s %s\n", prefix, string);
+    printf("str str: %s\n", string);
+    Removes unnecessary spaces in a string.
+            return 0;
+        return 0;
+    return 0;
+            return -1;
+    return 1;
+        return num1;
+    return num2;
+            shell_warning("runtime error at chdir()\n");
+        sprintf(buffer, "\033[32m%s\033[m", string);
+        sprintf(buffer, "\033[34m%s\033[m", string);
+        sprintf(buffer, "\033[37m%s\033[m", string);
+            strcat(target, path + strlen("~"));
+    strcat(tmp, string);
+    strcpy(buffer, str1);
+    strcpy(str1, str2);
+    strcpy(str2, buffer);
+        strcpy(string, buffer);
+        strcpy(string, buffer);
+        strcpy(string, buffer);
+    strcpy(string, tmp);
+        strcpy(target, path);
+        strcpy(target, sv->home_path);
+    strcpy(tmp, prefix);
+            string[i] = string[i] + 32;
+    // success
+void add_color_to_string(char *string, int color_code) {
+void clear_string(char *str) {
+void convert_shell_path_to_absolute_path(char *target, const char *path) {
+// void convert_shell_path_to_absolute_path(char *target, const char *path, const struct ShellVariables *sv) {
+void format_string(char *dest, const char *source) {
+void int_swap(int *num1, int *num2) {
+void prepend_string(const char *prefix, char *string) {
+void string_swap(char *str1, char *str2) {
+void string_to_lower(char *string) {
+void trim_string(char *dest, const char *source) {
+    while(i <= last_char) {
+    while(i <= last_char) {
+    while(i < len_source && source[i] == ' ') {
+    while(source[i] == ' ' || source[i] == '\t' || source[i] == '\n') {

@@ -11,8 +11,6 @@
 #include <unistd.h>
 
 #include "../globals.h"
-#include "../utils.h"
-#include "../shell_manipulation.h"
 
 #define MAX_LS_ARGS 25
 #define NUM_LS_FLAGS_SUPPORTED 4  // -l, -a, -la, -al
@@ -158,7 +156,8 @@ void get_permissions(struct directory_info *data, struct stat file_stats, int i)
     if(st_mode_check(file_stats, S_IXOTH)) data->permissions[i][9] = 'x';
 }
 
-void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct ShellVariables *sv) {
+void ls_on_one_directory(char *argument, const int *flag_bitmap) {
+
     // first check whether the argument is a file or a directory
     struct stat arg_stats;
     if(stat(argument, &arg_stats) != 0) {
@@ -290,8 +289,8 @@ void ls_on_one_directory(char *argument, const int *flag_bitmap, const struct Sh
     free(previous_path);
 }
 
+void run_ls(const char *args) {
 
-void run_ls(const char *args, const struct ShellVariables *sv) {
     /*
     list (ls) arguments -
     None - Display the names of all files (ascending lexicographical order)
@@ -398,8 +397,10 @@ void run_ls(const char *args, const struct ShellVariables *sv) {
         // void convert_shell_path_to_absolute_path(char *target, const char *path, struct ShellVariables *sv) {
         char path[MAX_PATH_LEN];
         // strcpy(path, arguments[i]);
-        convert_shell_path_to_absolute_path(path, arguments[i], sv);
-        ls_on_one_directory(path, flag_bitmap, sv);
+        // convert_shell_path_to_absolute_path(path, arguments[i], sv);
+        // ls_on_one_directory(path, flag_bitmap, sv);
+        convert_shell_path_to_absolute_path(path, arguments[i]);
+        ls_on_one_directory(path, flag_bitmap);
     }
     
     free(flag_bitmap);

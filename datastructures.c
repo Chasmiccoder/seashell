@@ -2,9 +2,7 @@
 #include <stdlib.h>
 
 #include "globals.h"
-#include "utils.h"
 #include "datastructures.h"
-// #include "shell_manipulation.h"
 
 void init_queue(struct queue **Q) {
     *Q = malloc(sizeof(struct queue**));

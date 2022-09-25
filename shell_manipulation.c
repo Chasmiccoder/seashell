@@ -3,12 +3,10 @@
 #include <unistd.h>
 #include <string.h>
 
-// #include "globals.h"
-#include "utils.h"
+#include "globals.h"
 #include "datastructures.h"
-#include "shell_manipulation.h"
 
-void init_shell_variables(struct ShellVariables *sv) {
+void init_shell_variables() {
     /* --- Fetch the username and the hostname --- */
     sv->username = malloc(MAX_USERNAME_LEN * sizeof(char));
     sv->username = getlogin();
@@ -30,9 +28,55 @@ void init_shell_variables(struct ShellVariables *sv) {
 
     sv->command_buffer = malloc(sizeof(struct queue*));
     init_queue(sv->command_buffer);
+
+    sv->background_process_ids = malloc(MAX_NUM_OF_BACKGROUND_PROCESSES * sizeof(int));
+    sv->background_process_assigned_ids = malloc(MAX_NUM_OF_BACKGROUND_PROCESSES * sizeof(int));
+    sv->background_process_names = malloc(MAX_NUM_OF_BACKGROUND_PROCESSES * sizeof(char*));
+    sv->background_process_status = malloc(MAX_NUM_OF_BACKGROUND_PROCESSES * sizeof(char*));
+    for(int i = 0; i < MAX_NUM_OF_BACKGROUND_PROCESSES; i++) {
+        sv->background_process_names[i] = malloc(MAX_PATH_LEN * sizeof(char));
+        sv->background_process_status[i] = malloc(STATUS_SIZE * sizeof(char));
+        sv->background_process_ids[i] = -1;
+        sv->background_process_assigned_ids[i] = -1;
+        clear_string(sv->background_process_names[i]);
+        clear_string(sv->background_process_status[i]);
+    }
+    sv->background_process_count = 0;
+    sv->num_background_processes = 0;
 }
 
-void print_shell_prompt(const struct ShellVariables *sv) {
+void add_background_process(int pid, int assigned_id, char *name, char *status) {
+    for(int i = 0; i < MAX_NUM_OF_BACKGROUND_PROCESSES; i++) {
+        if(sv->background_process_ids[i] == -1) {
+            sv->background_process_ids[i] = pid;
+            sv->background_process_assigned_ids[i] = assigned_id;
+            strcpy(sv->background_process_names[i], name);
+            strcpy(sv->background_process_status[i], status);
+            sv->num_background_processes++;
+            sv->background_process_count++;
+            return;
+        }
+    }
+    shell_warning("background process limit reached!");
+}
+
+void remove_background_process(int pid) {
+    int i = 0;
+    while(i < MAX_NUM_OF_BACKGROUND_PROCESSES) {
+        if(sv->background_process_ids[i] == pid) {
+            sv->background_process_ids[i] = -1;
+            sv->background_process_assigned_ids[i] = -1;
+            clear_string(sv->background_process_names[i]);
+            clear_string(sv->background_process_status[i]);
+            sv->num_background_processes--;
+            return;
+        }
+        i++;
+    }
+}
+
+
+void print_shell_prompt() {
     /*
     Prints the shell prompt with the format,
     <username@system: ~ >
@@ -72,5 +116,3 @@ void shell_warning(const char *message) {
     // perror(buffer);
     free(buffer);
 }
-
-

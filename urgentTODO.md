@@ -3,3 +3,8 @@ create a function that processes the paths before feeding them directly. This is
 pinfo
 
 look at readme for other fixes
+
+sort discover output
+
+reap ded processes.
+fix bug when command not found happens

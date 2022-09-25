@@ -4,11 +4,10 @@
 #include <string.h>
 
 #include "../globals.h"
-#include "../utils.h"
 #include "../datastructures.h"
-// #include "../shell_manipulation.h"
 
-void update_history_db(struct ShellVariables *sv) {
+void update_history_db() {
+
     struct queue **Q = sv->command_buffer;
 
     char history_db_path[MAX_PATH_LEN];
@@ -17,7 +16,6 @@ void update_history_db(struct ShellVariables *sv) {
     strcat(history_db_path, "history_database.txt");
 
     remove(history_db_path);
-
 
     FILE *history_db = fopen(history_db_path, "w");
     struct string_node *current = (*sv->command_buffer)->front;
@@ -32,7 +30,8 @@ void update_history_db(struct ShellVariables *sv) {
     fclose(history_db);
 }
 
-void add_command_to_history(struct ShellVariables *sv, const char *command) {
+
+void add_command_to_history(const char *command) {
     /*
     We're maintaining a 'moving' queue with nodes
     Push the command at the rear, if it is not the last command
@@ -40,7 +39,6 @@ void add_command_to_history(struct ShellVariables *sv, const char *command) {
     */
 
     struct queue **Q = sv->command_buffer;
-
 
     if((*Q)->size  == 0) {
         strcpy((*Q)->rear->string, command);
@@ -70,8 +68,7 @@ void add_command_to_history(struct ShellVariables *sv, const char *command) {
     }
 }
 
-void fetch_history_db(struct ShellVariables *sv) {
-
+void fetch_history_db() {
     char history_db_path[MAX_PATH_LEN];
     strcpy(history_db_path, sv->home_path);
     strcat(history_db_path, "/");
@@ -86,13 +83,13 @@ void fetch_history_db(struct ShellVariables *sv) {
     char line[MAX_COMMAND_LEN];
 
     while(fscanf(history_db, "%[^\n]%*c", line)!= EOF) {
-        add_command_to_history(sv, line);
+        add_command_to_history(line);
     }
     
     fclose(history_db);
 }
 
-void run_history(const struct ShellVariables *sv) {
+void run_history(const char *args) {
     /*
     Commands run are always stored in the shell variables
     Using a custom circular queue, to make things easier
@@ -102,11 +99,13 @@ void run_history(const struct ShellVariables *sv) {
     While printing, we want to print in reverse chronological order, so print the
     queue from the rear to the front
     */
-    
-    char *arg = strtok(NULL, " ");
 
     int num_commands = 10;
-    if(arg != NULL) {
+    if(args != NULL) {
+        char args_modifiable[MAX_COMMAND_LEN];
+        strcpy(args_modifiable, args);
+        char *arg = strtok(args_modifiable, " ");
+
         char num_string[MAX_PATH_LEN];
         strcpy(num_string, arg);
 

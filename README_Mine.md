@@ -88,6 +88,8 @@ check if & is present elsewhere like, sleep 2&
 
 ls after cd not working :(
 
+if gedit is already open, it shows that the process has stopped in the terminal if gedit & is run
+
 
 
 
